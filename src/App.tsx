@@ -6,20 +6,26 @@ import DropDownMenu from './components/DropDownMenu';
 import Matrix from './components/Matrix';
 import Point from './classes/Point';
 import {getMousePos} from './functions/canvasFunctions';
-import {BASE_CONNECTION_COLOR, STAGE_SIZE} from './consts';
+import {BASE_CONNECTION_COLOR, BASE_POINT_COLOR, STAGE_SIZE} from './consts';
 import Dijkstra from './functions/Dijkstra';
 import {Floyd} from './functions/Floyd';
-import {Layout, message} from 'antd';
+import {Button, Layout, message} from 'antd';
 import Connection from './classes/Connection';
 import toConnectionMatrix from './functions/toConnectionMatrix';
-import './App.css';
-
-const {Content, Header, Footer} = Layout
+import './App.scss';
+import Header from './components/Header';
+import Main from './components/Main';
+import Footer from './components/Footer';
+import {IncidenceMatrixCell} from './types';
 
 const App: FC = () => {
 
-    const [points, setPoints] = useState<Point[]>([])
-    const [connections, setConnections] = useState<Connection[]>([])
+    const [points, setPoints] = useState<Point[]>([new Point(10,12,'123',BASE_POINT_COLOR)])
+    // const [connections, setConnections] = useState<Connection[]>([new Connection('123','321',22,'black','223')])
+    // const [incidenceMatrix, setIncidenceMatrix] = useState<IncidenceMatrixCell[][]>([
+    //     ['',new Connection('123','321',22,'black','223')],[new Point(10,12,'123',BASE_POINT_COLOR),1]
+    // ])
+
     const [incMatrix, setIncMatrix] = useState<any[]>([[]])
     const [path, setPath] = useState<number[]>([])
     const [distance, setDistance] = useState<number | undefined>(undefined)
@@ -45,41 +51,41 @@ const App: FC = () => {
         }
     }
 
-    const addConnection = (event: any, point: any[] | any, setConnectionPreview?: (p: any) => void, detectConnection?: any) => {
-        if (event && point && setConnectionPreview && detectConnection) {
-            setConnectionPreview(null)
-            const stage = event.target.getStage()
-            const mousePos = stage.getPointerPosition()
-            const connectionTo = detectConnection(mousePos, point)
-            const isExist = connections.some(connection => {
-                return (connection.from === point.key && connection.to === connectionTo.key) ||
-                    (connection.from === connectionTo.key && connection.to === point.key)
-            })
-            if (connectionTo && !isExist) {
-                setConnections([
-                    ...connections,
-                    new Connection(point.key, connectionTo.key, 1, BASE_CONNECTION_COLOR, String(new Date().getTime())),
-                ])
-            }
-        } else {
-            if (setConnectionPreview instanceof Function) setConnectionPreview(null)
-            const from = points.find(p => p.key === point[0])
-            const to = points.find(p => p.key === point[1])
-            let isExist
-            if (from && to) {
-                isExist = connections.some((connection: Connection) => {
-                    return (connection.from === from.key && connection.to === to.key) ||
-                        (connection.from === to.key && connection.to === from.key)
-                })
-            }
-            if (!isExist && from && to) {
-                setConnections([
-                    ...connections,
-                    new Connection(from.key, to.key, 1, BASE_CONNECTION_COLOR, String(new Date().getTime())),
-                ])
-            } else message.warn('Соединение уже существует', 1).then()
-        }
-    }
+    // const addConnection = (event: any, point: any[] | any, setConnectionPreview?: (p: any) => void, detectConnection?: any) => {
+    //     if (event && point && setConnectionPreview && detectConnection) {
+    //         setConnectionPreview(null)
+    //         const stage = event.target.getStage()
+    //         const mousePos = stage.getPointerPosition()
+    //         const connectionTo = detectConnection(mousePos, point)
+    //         const isExist = connections.some(connection => {
+    //             return (connection.from === point.key && connection.to === connectionTo.key) ||
+    //                 (connection.from === connectionTo.key && connection.to === point.key)
+    //         })
+    //         if (connectionTo && !isExist) {
+    //             setConnections([
+    //                 ...connections,
+    //                 new Connection(point.key, connectionTo.key, 1, BASE_CONNECTION_COLOR, String(new Date().getTime())),
+    //             ])
+    //         }
+    //     } else {
+    //         if (setConnectionPreview instanceof Function) setConnectionPreview(null)
+    //         const from = points.find(p => p.key === point[0])
+    //         const to = points.find(p => p.key === point[1])
+    //         let isExist
+    //         if (from && to) {
+    //             isExist = connections.some((connection: Connection) => {
+    //                 return (connection.from === from.key && connection.to === to.key) ||
+    //                     (connection.from === to.key && connection.to === from.key)
+    //             })
+    //         }
+    //         if (!isExist && from && to) {
+    //             setConnections([
+    //                 ...connections,
+    //                 new Connection(from.key, to.key, 1, BASE_CONNECTION_COLOR, String(new Date().getTime())),
+    //             ])
+    //         } else message.warn('Соединение уже существует', 1).then()
+    //     }
+    // }
 
     const computePath = () => {
         let connectionMatrix = toConnectionMatrix(incMatrix)
@@ -119,30 +125,31 @@ const App: FC = () => {
         }
     }
 
-    const deleteConnection = () => {
-        setConnections(connections.filter(connection => {
-            if (selectedEntity) return connection.from !== selectedEntity.from || connection.to !== selectedEntity.to
-        }))
-        setMenuVisible(false)
-    }
+    // const deleteConnection = () => {
+    //     setConnections(connections.filter(connection => {
+    //         if (selectedEntity) return connection.from !== selectedEntity.from || connection.to !== selectedEntity.to
+    //     }))
+    //     setMenuVisible(false)
+    // }
 
-    const changeWeight = (weight: number | undefined) => {
-        setConnections(connections.map(connection => {
-            if (selectedEntity && connection.from === selectedEntity.from && connection.to === selectedEntity.to) {
-                connection.weight = Number(weight)
-            }
-            return connection
-        }))
-        setInputVisible(false)
-        setMenuVisible(false)
-    }
+    // const changeWeight = (weight: number | undefined) => {
+    //     setConnections(connections.map(connection => {
+    //         if (selectedEntity && connection.from === selectedEntity.from && connection.to === selectedEntity.to) {
+    //             connection.weight = Number(weight)
+    //         }
+    //         return connection
+    //     }))
+    //     setInputVisible(false)
+    //     setMenuVisible(false)
+    // }
 
-    return <div className="full-height" style={{display: 'grid', gridTemplateRows: '1fr 750px 1fr'}}>
-        <div>1</div>
-        <div>
-            2
-        </div>
-        <div>3</div>
+    return     <div className="full-height app">
+        <Header/>
+        <Main        />
+        <Footer/>
+    </div>
+
+
         {/*<div className="flex-column-center align-content-space-between">*/}
         {/*    <Highlighter*/}
         {/*        points={points}*/}
@@ -197,7 +204,6 @@ const App: FC = () => {
         {/*    setInputVisible={setInputVisible}*/}
         {/*    selectedEntity={selectedEntity}*/}
         {/*/>}*/}
-    </div>
 }
 
 export default App;

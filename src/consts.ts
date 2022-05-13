@@ -1,5 +1,5 @@
-export const SIZE: number = 20
-export const STAGE_SIZE: number = 500
+export const POINT_SIZE: number = 20
+export const STAGE_SIZE: number = 550
 
 export const BUTTON_WIDTH: number = 310
 

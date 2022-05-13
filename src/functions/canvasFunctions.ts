@@ -1,14 +1,15 @@
-import {SIZE} from '../consts';
+import {POINT_SIZE} from '../consts';
 import Point from '../classes/Point';
-import React from 'react';
+import Konva from 'konva';
 
-export function createConnectionPoints(source: {x: number, y: number}, destination: {x: number, y: number}) {
+export function createConnectionPoints(source: Konva.Vector2d, destination: Konva.Vector2d) {
     return [source.x, source.y, destination.x, destination.y]
 }
 
-export function hasIntersection(position: {x: number}, point: Point) {
+export function hasIntersection(position: Konva.Vector2d, point: Point) {
     const radius = Math.sqrt(Math.pow(position.x - point.x, 2) + Math.pow(position.x - point.x, 2))
-    return SIZE - radius > 0
+    console.log(position,point)
+    return POINT_SIZE - radius > 0
 }
 
 export function getConnectionCoords(fromPoint: Point, toPoint: Point) {
@@ -26,7 +27,7 @@ export function getConnectionCoords(fromPoint: Point, toPoint: Point) {
     return [x, y]
 }
 
-export function getMousePos(event: any): {x: number, y: number} {
+export function getMousePos(event: any): Konva.Vector2d {
     const position = event.target.position()
     const stage = event.target.getStage()
     const pointerPosition = stage.getPointerPosition()
