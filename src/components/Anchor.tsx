@@ -1,8 +1,8 @@
 import React, {FC, useRef} from 'react';
 import {Circle} from 'react-konva';
 import Konva from 'konva';
-import KonvaEventObject = Konva.KonvaEventObject;
 import Point from '../classes/Point';
+import KonvaEventObject = Konva.KonvaEventObject;
 
 interface AnchorProps {
     x: number
@@ -17,7 +17,7 @@ const Anchor: FC<AnchorProps> = ({x, y, point, dragStartHandler, dragMoveHandler
 
     const anchor = useRef<Konva.Circle>(null)
 
-    const dragBounds = (ref: React.RefObject<Konva.Circle>) => {
+    const dragBounds = (ref: React.RefObject<Konva.Circle>): Konva.Vector2d => {
         if (ref.current !== null) {
             return ref.current.getAbsolutePosition()
         }

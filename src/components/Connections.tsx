@@ -1,19 +1,16 @@
-import React, {FC, Fragment, useEffect} from 'react';
+import React, {FC, Fragment} from 'react';
 import graphStore from '../stores/GraphStore';
 import Konva from 'konva';
-import {KonvaEventObject} from 'konva/lib/Node';
 import Connection from '../classes/Connection';
 import {Line} from 'react-konva';
 import {observer} from 'mobx-react-lite';
+import KonvaEventObject = Konva.KonvaEventObject;
 
 interface ConnectionsProps {
-    handleOnContextMenu: (event: KonvaEventObject<PointerEvent>, connection: Connection) => any
+    onClickHandler: (event: KonvaEventObject<PointerEvent>, connection: Connection) => void
 }
 
-const Connections: FC<ConnectionsProps> = observer(({handleOnContextMenu}) => {
-
-    useEffect(() => {
-    }, [graphStore.points])
+const Connections: FC<ConnectionsProps> = observer(({onClickHandler}) => {
 
     const createConnectionPoints = (source: Konva.Vector2d, destination: Konva.Vector2d) => {
         return [source.x, source.y, destination.x, destination.y]
@@ -34,7 +31,7 @@ const Connections: FC<ConnectionsProps> = observer(({handleOnContextMenu}) => {
                 stroke={connection.colour}
                 strokeWidth={3}
                 hitStrokeWidth={5}
-                onContextMenu={(event: KonvaEventObject<PointerEvent>) => handleOnContextMenu(event, connection)}
+                onClick={(event: KonvaEventObject<PointerEvent>) => onClickHandler(event, connection)}
             />
         })}
     </Fragment>

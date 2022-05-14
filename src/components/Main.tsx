@@ -1,26 +1,20 @@
-import React, {Dispatch, FC, MouseEventHandler, SetStateAction, useContext} from 'react';
-import Point from '../classes/Point';
-import Connection from '../classes/Connection';
+import React, {FC, useState} from 'react';
 import Matrix from './Matrix';
 import Canvas from './Canvas';
-import {getMousePos} from '../functions/canvasFunctions';
-import {message} from 'antd';
-import {STAGE_SIZE} from '../consts';
-import Konva from 'konva';
+import CanvasMenu from './CanvasMenu';
+import MatrixContainer from './MatrixContainer';
 
-interface MainProps {
-    // points: Point[]
-    // connections: Connection[]
-    // setPoints: Dispatch<SetStateAction<Point[]>>
-    // setConnections: Dispatch<SetStateAction<Connection[]>>
-}
+// interface MainProps {
+// points: Point[]
+// connections: Connection[]
+// setPoints: Dispatch<SetStateAction<Point[]>>
+// setConnections: Dispatch<SetStateAction<Connection[]>>
+// }
 
-const Main: FC<MainProps> = ({
-                                 // points,
-                                 // connections,
-                                 // setPoints,
-                                 // setConnections,
-                             }) => {
+const Main: FC = () => {
+
+    const [canvasMenuVisible, setCanvasMenuVisible] = useState<boolean>(false)
+    const [canvasMenuStyle, setCanvasMenuStyle] = useState<object>({})
 
     // const addPoint = (event: any, stage?: Konva.Stage | null) => {
     //     if (event?.target === stage) {
@@ -48,14 +42,11 @@ const Main: FC<MainProps> = ({
     // }
 
     return <div className="main">
-        <Matrix
-            // points={points}
-            // connections={connections}
-            // setPoints={setPoints}
-            // setConnections={setConnections}
-            // addPoint={addPoint}
-        />
-        <Canvas/>
+        <MatrixContainer>
+            <Matrix/>
+        </MatrixContainer>
+        <Canvas setCanvasMenuVisible={setCanvasMenuVisible} setCanvasMenuStyle={setCanvasMenuStyle}/>
+        <CanvasMenu visible={canvasMenuVisible} setVisible={setCanvasMenuVisible} canvasMenuStyle={canvasMenuStyle}/>
     </div>
 }
 

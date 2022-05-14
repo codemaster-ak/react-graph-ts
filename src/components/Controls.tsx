@@ -1,44 +1,50 @@
 import React, {FC, useEffect, useState} from 'react';
-import {Button, Select} from 'antd';
-import {BUTTON_WIDTH} from '../consts';
-import {getAllFileNames, getFileById, remove, save, update} from '../functions/http';
+import {message, Select} from 'antd';
+import {BUTTON_WIDTH, STAGE_SIZE} from '../consts';
+import {getAllFileNames, getFileById, remove, save} from '../functions/http';
+import {observable, runInAction} from 'mobx';
+import graphStore from '../stores/GraphStore';
+import Point from '../classes/Point';
+import Connection from '../classes/Connection';
+import {observer} from 'mobx-react-lite';
+import fileStore from "../stores/FileStore";
 
 const {Option} = Select
 
 interface ControlsProps {
-    setPoints: (p: any[]) => void
-    setConnections: (p: any[]) => void
-    fromPoint: any
-    setFromPoint: (value: any) => void
-    toPoint: any
-    setToPoint: (value: any) => void
-    incMatrix: any[]
-    setIncMatrix: (p: any[]) => void
     computePath: () => void
-    addPoint: (event: React.MouseEvent<HTMLElement>, stageRef?: {current: any}) => void
-    addConnection: (event: React.MouseEvent<HTMLElement>, p: any[]) => void
 }
 
-const Controls: FC<ControlsProps> = ({
-                                         setPoints,
-                                         setConnections,
-                                         fromPoint,
-                                         setFromPoint,
-                                         toPoint,
-                                         setToPoint,
-                                         incMatrix,
-                                         setIncMatrix,
-                                         computePath,
-                                         addPoint,
-                                         addConnection,
-                                     }) => {
+const Controls: FC<ControlsProps> = observer(({computePath}) => {
 
-    const [files, setFiles] = useState<{title: string}[]>([])
-    const [selectedFile, setSelectedFile] = useState<string | undefined>(undefined)
+    const [fromPointKey, setFromPointKey] = useState<string | undefined>(undefined)
+    const [toPointKey, setToPointKey] = useState<string | undefined>(undefined)
+
+    const [files, setFiles] = useState<{ name: string }[]>([])
+    const [selectedFile, setSelectedFile] = useState<string | null>(null)
 
     useEffect(() => {
-        loadFiles()
+        fileStore.getAllFileNames().then()
     }, [])
+
+    const addPoint = () => {
+        const x = Math.round(Math.random() * STAGE_SIZE)
+        const y = Math.round(Math.random() * STAGE_SIZE)
+        try {
+            graphStore.addPoint(x, y)
+        } catch (error: any) {
+            message.warn(error.message, 1).then()
+        }
+    }
+
+    const addConnection = () => {
+        if (fromPointKey && toPointKey) {
+            const from = graphStore.getPointByKey(fromPointKey)
+            const to = graphStore.getPointByKey(toPointKey)
+            if (from && to) graphStore.addConnection(from, to)
+        }
+    }
+
 
     const loadFiles = () => {
         getAllFileNames().then(data => {
@@ -51,28 +57,28 @@ const Controls: FC<ControlsProps> = ({
     const download = () => {
         getFileById(selectedFile).then(data => {
             if (Array.isArray(data)) {
-                setIncMatrix([...data])
+                // setIncMatrix([...data])
                 parsePointsAndConnections(data)
             }
         })
     }
 
     const createFile = () => {
-        save(incMatrix).then(res => {
-            if (!files.some(file => file.title === res.title)) {
-                setFiles([...files, {title: res.title}])
+        save(graphStore.incidenceMatrix).then(res => {
+            if (!files.some(file => file.name === res.name)) {
+                setFiles([...files, {name: res.name}])
             }
         })
     }
 
     const updateFile = async () => {
-        await update({matrix: incMatrix, fileName: selectedFile})
+        // await update({matrix: incMatrix, fileName: selectedFile})
     }
 
     const deleteFile = () => {
         remove(selectedFile).then(() => {
-            setFiles([...files.filter((file) => file.title !== selectedFile)])
-            setSelectedFile(undefined)
+            setFiles([...files.filter((file) => file.name !== selectedFile)])
+            setSelectedFile(null)
         })
     }
 
@@ -85,113 +91,125 @@ const Controls: FC<ControlsProps> = ({
                 pointsTemp.push(matrix[i][0])
             }
         }
-        setPoints([])
-        setConnections([])
+        runInAction(() => {
+            graphStore.points = observable.array<Point>([])
+            graphStore.connections = observable.array<Connection>([])
+        })
+        // setPoints([])
+        // setConnections([])
     }
 
     const clear = () => {
-        setConnections([])
-        setPoints([])
+        runInAction(() => {
+            graphStore.points = observable.array<Point>([])
+            graphStore.connections = observable.array<Connection>([])
+        })
+        // setConnections([])
+        // setPoints([])
     }
-
+    console.log(fileStore.files)
     return <div className="controls">
-        <div className="flex-column margin-right-lg">
-            <div className="space-between">
-                <Select
-                    placeholder="От"
-                    value={fromPoint}
-                    onChange={(value) => setFromPoint(value)}
-                    style={{width: 150}}
-                >
-                    {incMatrix.map((row, index) => {
-                        if (index > 0) return <Option value={row[0].key} key={row[0].key}>{row[0].name}</Option>
-                        else return null
-                    })}
-                </Select>
-                <Select placeholder="До"
-                        value={toPoint}
-                        onChange={(value) => setToPoint(value)}
-                        style={{width: 150}}
-                >
-                    {incMatrix.map((row, index) => {
-                        if (index > 0) return <Option value={row[0].key} key={row[0].key}>{row[0].name}</Option>
-                        else return null
-                    })}
-                </Select>
-            </div>
-            <div className="flex-container">
-                <Button
-                    type="primary"
-                    onClick={computePath}
-                    disabled={!fromPoint || !toPoint || fromPoint === toPoint}
-                    style={{marginTop: 10, marginRight: 10}}
-                >
-                    Найти кратчайший путь
-                </Button>
-                <Button
-                    type="primary"
-                    onClick={clear}
-                    style={{marginTop: 10, width: BUTTON_WIDTH / 2 - 5}}
-                >
-                    Очистить
-                </Button>
-            </div>
-        </div>
-        <div className="flex-column margin-right-lg">
-            <Button
-                type="primary"
-                onClick={event => addPoint(event)}
-                disabled={incMatrix.length > 10}
-            >
-                Добавить вершину
-            </Button>
-            <Button
-                type="primary"
-                onClick={event => addConnection(event, [fromPoint, toPoint])}
-                disabled={!fromPoint || !toPoint || fromPoint === toPoint}
-                style={{marginTop: 10}}
-            >
-                Добавить связь
-            </Button>
-        </div>
-        <div className="flex-column" style={{width: BUTTON_WIDTH}}>
+        {/*<div className="flex-column margin-right-lg">*/}
+        {/*    <div className="space-between">*/}
+        {/*        <Select*/}
+        {/*            placeholder="От"*/}
+        {/*            value={fromPointKey}*/}
+        {/*            onChange={value => setFromPointKey(value)}*/}
+        {/*            style={{width: 150}}*/}
+        {/*        >*/}
+        {/*            {graphStore.points.map(point => {*/}
+        {/*                return <Option value={point.key} key={point.key}>*/}
+        {/*                    {point.getPointName()}*/}
+        {/*                </Option>*/}
+        {/*            })}*/}
+        {/*        </Select>*/}
+        {/*        <Select*/}
+        {/*            placeholder="До"*/}
+        {/*            value={toPointKey}*/}
+        {/*            onChange={value => setToPointKey(value)}*/}
+        {/*            style={{width: 150}}*/}
+        {/*        >*/}
+        {/*            {graphStore.points.map(point => {*/}
+        {/*                return <Option value={point.key} key={point.key}>*/}
+        {/*                    {point.getPointName()}*/}
+        {/*                </Option>*/}
+        {/*            })}*/}
+        {/*        </Select>*/}
+        {/*    </div>*/}
+        {/*    <div className="flex-container">*/}
+        {/*        <Button*/}
+        {/*            type="primary"*/}
+        {/*            onClick={computePath}*/}
+        {/*            disabled={!fromPointKey || !toPointKey || fromPointKey === toPointKey}*/}
+        {/*            style={{marginTop: 10, marginRight: 10}}*/}
+        {/*        >*/}
+        {/*            Найти кратчайший путь*/}
+        {/*        </Button>*/}
+        {/*        <Button*/}
+        {/*            type="primary"*/}
+        {/*            onClick={clear}*/}
+        {/*            style={{marginTop: 10, width: BUTTON_WIDTH / 2 - 5}}*/}
+        {/*        >*/}
+        {/*            Очистить*/}
+        {/*        </Button>*/}
+        {/*    </div>*/}
+        {/*</div>*/}
+        {/*<div className="flex-column margin-right-lg">*/}
+        {/*    <Button*/}
+        {/*        type="primary"*/}
+        {/*        onClick={addPoint}*/}
+        {/*        disabled={graphStore.points.length > 9}*/}
+        {/*    >*/}
+        {/*        Добавить вершину*/}
+        {/*    </Button>*/}
+        {/*    <Button*/}
+        {/*        type="primary"*/}
+        {/*        onClick={addConnection}*/}
+        {/*        disabled={!fromPointKey || !toPointKey || fromPointKey === toPointKey}*/}
+        {/*        style={{marginTop: 10}}*/}
+        {/*    >*/}
+        {/*        Добавить связь*/}
+        {/*    </Button>*/}
+        {/*</div>*/}
+        {/*<div className="flex-column" style={{width: BUTTON_WIDTH}}>*/}
             <Select
                 placeholder="Выберите матрицу"
                 style={{width: BUTTON_WIDTH, marginBottom: 10}}
                 value={selectedFile}
-                onChange={(value) => setSelectedFile(value)}
                 allowClear
             >
-                {files.map(file => {
-                    return <Option key={file.title} value={file.title}>{file.title}</Option>
+                {fileStore.files.map(file => {
+                    return <Option key={file.name} value={file.name}>
+                        {file.name}
+                    </Option>
                 })}
             </Select>
-            <div className="space-between">
-                <Button
-                    type="primary"
-                    onClick={download}
-                    style={{width: 100}}
-                >
-                    Загрузить
-                </Button>
-                <Button
-                    type="primary"
-                    onClick={selectedFile ? updateFile : createFile}
-                    style={{width: 100}}
-                >
-                    Сохранить
-                </Button>
-                <Button
-                    type="primary"
-                    onClick={deleteFile}
-                    style={{width: 100}}
-                    disabled={!selectedFile}
-                >
-                    Удалить
-                </Button>
-            </div>
-        </div>
+            {/*<div className="space-between">*/}
+            {/*    <Button*/}
+            {/*        type="primary"*/}
+            {/*        onClick={download}*/}
+            {/*        style={{width: 100}}*/}
+            {/*    >*/}
+            {/*        Загрузить*/}
+            {/*    </Button>*/}
+            {/*    <Button*/}
+            {/*        type="primary"*/}
+            {/*        onClick={selectedFile ? updateFile : createFile}*/}
+            {/*        style={{width: 100}}*/}
+            {/*    >*/}
+            {/*        Сохранить*/}
+            {/*    </Button>*/}
+            {/*    <Button*/}
+            {/*        type="primary"*/}
+            {/*        onClick={deleteFile}*/}
+            {/*        style={{width: 100}}*/}
+            {/*        disabled={!selectedFile}*/}
+            {/*    >*/}
+            {/*        Удалить*/}
+            {/*    </Button>*/}
+            {/*</div>*/}
+        {/*</div>*/}
     </div>
-}
+})
 
 export default Controls;

@@ -1,10 +1,7 @@
-import React, {FC, Fragment, useEffect} from 'react';
-import {Line} from 'react-konva';
-import {createConnectionPoints} from '../functions/canvasFunctions';
-import Konva from 'konva';
+import {FC, ReactElement, ReactNode} from 'react';
 
 interface ConnectionPreviewProps {
-    line: any
+    line: ReactElement<ReactNode> | null
 }
 
 const ConnectionPreview: FC<ConnectionPreviewProps> = ({line}) => {

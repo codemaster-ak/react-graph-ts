@@ -1,6 +1,6 @@
 import {BASE_INIT, BASE_URL, HTTP_METHODS} from '../consts';
 
-export async function getFileById(file: string | undefined) {
+export async function getFileById(file: string | null) {
     const init = {
         ...BASE_INIT,
         method: HTTP_METHODS.GET,
@@ -50,7 +50,7 @@ export async function update(payload: any) {
     })
 }
 
-export async function remove(file: string | undefined) {
+export async function remove(file: string | null) {
     const init = {
         ...BASE_INIT,
         method: HTTP_METHODS.DELETE,

@@ -2,10 +2,8 @@ import React, {FC, useState} from 'react';
 import Controls from './components/Controls';
 import Canvas from './components/Canvas';
 import Highlighter from './components/Highlighter';
-import DropDownMenu from './components/DropDownMenu';
 import Matrix from './components/Matrix';
 import Point from './classes/Point';
-import {getMousePos} from './functions/canvasFunctions';
 import {BASE_CONNECTION_COLOR, BASE_POINT_COLOR, STAGE_SIZE} from './consts';
 import Dijkstra from './functions/Dijkstra';
 import {Floyd} from './functions/Floyd';
@@ -37,19 +35,19 @@ const App: FC = () => {
     const [menuStyle, setMenuStyle] = useState<object>({})
     const [selectedEntity, setSelectedEntity] = useState<Connection | undefined>(undefined)
 
-    const addPoint = (event: any, stageRef?: { current: any }) => {
-        if (event.target === stageRef?.current) {
-            event.evt.preventDefault()
-            const mousePos = getMousePos(event)
-            if (points.length < 10) {
-                setPoints([...points, new Point(mousePos.x, mousePos.y, String(new Date().getTime()))])
-            } else message.warn('Достигнуто максимальное количество вершин - 10', 1).then()
-        } else {
-            const x = Math.round(Math.random() * STAGE_SIZE)
-            const y = Math.round(Math.random() * STAGE_SIZE)
-            setPoints([...points, new Point(x, y, String(new Date().getTime()))])
-        }
-    }
+    // const addPoint = (event: any, stageRef?: { current: any }) => {
+    //     if (event.target === stageRef?.current) {
+    //         event.evt.preventDefault()
+    //         const mousePos =Canvas. getMousePos(event)
+    //         if (points.length < 10) {
+    //             setPoints([...points, new Point(mousePos.x, mousePos.y, String(new Date().getTime()))])
+    //         } else message.warn('Достигнуто максимальное количество вершин - 10', 1).then()
+    //     } else {
+    //         const x = Math.round(Math.random() * STAGE_SIZE)
+    //         const y = Math.round(Math.random() * STAGE_SIZE)
+    //         setPoints([...points, new Point(x, y, String(new Date().getTime()))])
+    //     }
+    // }
 
     // const addConnection = (event: any, point: any[] | any, setConnectionPreview?: (p: any) => void, detectConnection?: any) => {
     //     if (event && point && setConnectionPreview && detectConnection) {
@@ -145,7 +143,7 @@ const App: FC = () => {
 
     return     <div className="full-height app">
         <Header/>
-        <Main        />
+        <Main   />
         <Footer/>
     </div>
 
@@ -196,7 +194,7 @@ const App: FC = () => {
         {/*        addConnection={addConnection}*/}
         {/*    />*/}
         {/*</div>*/}
-        {/*{menuVisible && <DropDownMenu*/}
+        {/*{menuVisible && <CanvasMenu*/}
         {/*    deleteConnection={deleteConnection}*/}
         {/*    changeWeight={changeWeight}*/}
         {/*    menuStyle={menuStyle}*/}

@@ -1,5 +1,4 @@
 import React, {FC, Fragment} from 'react';
-import Point from '../classes/Point';
 import Connection from '../classes/Connection';
 import {Circle} from 'react-konva';
 import graphStore from '../stores/GraphStore';

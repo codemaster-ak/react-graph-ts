@@ -1,10 +1,10 @@
 import {action, computed, makeObservable, observable} from 'mobx';
 import Point from '../classes/Point';
 import Connection from '../classes/Connection';
-import {BASE_CONNECTION_COLOR} from '../consts';
 
 class GraphStore {
     @observable selectedPoint: Point | null = null
+    @observable selectedConnection: Connection | null = null
     @observable points = observable.array<Point>([])
     @observable connections = observable.array<Connection>([])
 
@@ -22,8 +22,8 @@ class GraphStore {
 
     @action
     addConnection(from: Point, to: Point): void {
-        if (this.connections.length < 10) {
-            const newConnection = new Connection(from, to, 1, BASE_CONNECTION_COLOR, String(new Date().getTime()))
+        if (!this.checkExist(from, to)) {
+            const newConnection = new Connection(from, to, 1, Connection.BASE_COLOR, String(new Date().getTime()))
             this.connections.push(newConnection)
         }
     }
@@ -32,7 +32,6 @@ class GraphStore {
     selectPoint(key: string): void {
         if (this.selectedPoint?.key === key) this.selectedPoint = null
         else this.selectedPoint = this.points.find(point => point.key === key)!
-
     }
 
     @action
@@ -44,6 +43,16 @@ class GraphStore {
                 // this.points[i].y = y
                 this.updateConnections(this.points[i])
                 if (this.selectedPoint) this.selectedPoint = this.points[i]//todo ??
+            }
+        }
+    }
+
+    @action
+    changeConnectionWeight(key: string, weight: number): void {
+        for (let i = 0; i < this.connections.length; i++) {
+            if (this.connections[i].key === key) {
+                const {from, to, colour, key} = this.connections[i]
+                this.connections[i] = new Connection(from, to, weight, colour, key)
             }
         }
     }
@@ -82,7 +91,6 @@ class GraphStore {
         const index = this.connections.indexOf(connection)
         this.connections.splice(index, 1)
     }
-
 
     /** Матрица инцидентности */
     @computed
@@ -150,6 +158,17 @@ class GraphStore {
     findConnectionsByPointKey(key: string): Connection[] {
         return this.connections.filter(connection => {
             return connection.from.key === key || connection.to.key === key
+        })
+    }
+
+    getPointByKey(key: string): Point | undefined {
+        return this.points.find(point => point.key === key)
+    }
+
+    checkExist(from: Point, to: Point): boolean {
+        return graphStore.connections.some(connection => {
+            return (connection.from.key === from.key && connection.to.key === to.key)
+                || (connection.from.key === to.key && connection.to.key === from.key)
         })
     }
 }

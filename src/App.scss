@@ -2,6 +2,8 @@
 
 $rounded-radius: 4px;
 $matrix-stage-size: 550px;
+$spacing-md: 16px;
+$white: "#fff";
 
 * {
   margin: 0;
@@ -29,6 +31,18 @@ $matrix-stage-size: 550px;
   margin: 0;
 }
 
+.padding-md {
+  padding: $spacing-md;
+}
+
+.white-bg {
+  background: $white;
+}
+
+.shadow {
+  box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.1);
+}
+
 .rounded-top-left {
   border-top-left-radius: $rounded-radius;
 }
@@ -44,7 +58,6 @@ $matrix-stage-size: 550px;
 .rounded-bottom-right {
   border-bottom-right-radius: $rounded-radius;
 }
-
 
 .rounded-top {
   @extend .rounded-top-left;
@@ -84,25 +97,43 @@ $matrix-stage-size: 550px;
   display: grid;
 }
 
-.app {
+.grid-start {
   @extend .grid-container;
-  grid-template-rows: 1fr 65% 1fr;
+  justify-items: start;
+  align-items: start;
 }
 
-.main {
+.grid-center {
   @extend .grid-container;
-  grid-template-columns: 1fr  1fr;
   justify-items: center;
   align-items: center;
 }
 
-.matrix {
-  @extend .flex-column;
+.app {
+  @extend .grid-container;
+  grid-template-rows: 1fr 600px 1fr;
+}
+
+.main {
+  @extend .grid-center;
+  grid-template-columns: 1fr 1fr;
+}
+
+.matrix-container {
+  @extend .grid-start;
+  @extend .rounded;
+  @extend .white-bg;
+  @extend .padding-md;
+  @extend .shadow;
   height: $matrix-stage-size;
   width: $matrix-stage-size;
+  overflow: auto;
+}
+
+.matrix {
+  @extend .flex-column;
   flex-wrap: wrap;
   //grid-template-rows: repeat(auto-fill, 42px);
-  overflow: auto;
 }
 
 .matrix-row {
@@ -111,7 +142,6 @@ $matrix-stage-size: 550px;
   //border: 1px solid #000000;
   //text-align: center;
 }
-
 
 .matrix-cell {
   width: 60px;
@@ -122,6 +152,12 @@ $matrix-stage-size: 550px;
 
 .konvajs-content {
   @extend .rounded;
-  background: white;
-  box-shadow: 0 0 5px 5px #0000001a;
+  @extend .white-bg;
+  @extend .shadow;
+}
+
+.canvas-menu {
+  @extend .rounded;
+  @extend .white-bg;
+  position: absolute;
 }

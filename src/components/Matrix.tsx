@@ -8,7 +8,7 @@ import Konva from 'konva';
 import {observer} from 'mobx-react-lite';
 import graphStore from '../stores/GraphStore';
 
-interface MatrixProps {
+export interface MatrixProps {
     // addPoint: (event: Konva.KonvaEventObject<MouseEvent>, stageRef?: Konva.Stage|null) => void
 }
 
@@ -59,7 +59,6 @@ const Matrix: FC<MatrixProps> = observer(({
 
     return <div className="matrix">
         {graphStore.incidenceMatrix.map((row: IncidenceMatrixCell[], rowIndex) => {
-            // console.log(row)
             return <div key={rowIndex} className="matrix-row no-margin no-padding">
                 {row.map((cell: IncidenceMatrixCell, colIndex) => {
                     return <MatrixCell
@@ -67,7 +66,6 @@ const Matrix: FC<MatrixProps> = observer(({
                         col={colIndex}
                         row={rowIndex}
                         cell={cell}
-                        incidenceMatrix={graphStore.incidenceMatrix}
                         changeWeight={changeWeight}
                     />
                 })}

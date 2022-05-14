@@ -4,32 +4,37 @@ import Point from '../classes/Point';
 import Connection from '../classes/Connection';
 import {IncidenceMatrixCell} from '../types';
 import graphStore from '../stores/GraphStore';
+import {observer} from 'mobx-react-lite';
 
 interface MatrixCellProps {
     row: number
     col: number
     cell: IncidenceMatrixCell
-    incidenceMatrix: IncidenceMatrixCell[][]
     changeWeight: (value: number, row: number, col: number) => void
 }
 
-const MatrixCell: FC<MatrixCellProps> = ({
-                                             row,
-                                             col,
-                                             cell,
-                                             incidenceMatrix,
-                                             changeWeight,
-                                         }) => {
+const MatrixCell: FC<MatrixCellProps> = observer(({
+                                                      row,
+                                                      col,
+                                                      cell,
+                                                  }) => {
 
     const getCellText = (cell: IncidenceMatrixCell): string => {
-        // console.log(col,row,cell)
         if (cell instanceof Connection) return cell.getConnectionName()
         else if (cell instanceof Point) return cell.getPointName()
         else return ''
     }
 
-    const getWeight = (cell: IncidenceMatrixCell) => {
+    const getWeight = (cell: IncidenceMatrixCell): number | undefined => {
         if (col !== 0 && row !== 0) return Number(cell)
+    }
+
+    const changeWeight = (value: number): void => {
+        if (value > 0) {
+            for (let i = 0; i < graphStore.connections.length; i++) {
+                if (i + 1 === col) graphStore.changeConnectionWeight(graphStore.connections[i].key, value)
+            }
+        }
     }
 
     return <div className="matrix-cell">
@@ -42,12 +47,12 @@ const MatrixCell: FC<MatrixCellProps> = ({
                 min={0}
                 max={99}
                 value={getWeight(cell)}
-                readOnly={incidenceMatrix[row][col] === 0}
-                onChange={(value: number) => changeWeight(value, row, col)}
+                readOnly={graphStore.incidenceMatrix[row][col] === 0}
+                onChange={changeWeight}
                 style={{width: 60, border: '1px solid #000'}}
             />
         }
     </div>
-}
+})
 
 export default MatrixCell;

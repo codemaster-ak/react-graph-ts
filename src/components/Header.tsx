@@ -1,8 +1,16 @@
-import React from 'react';
+import React, {FC} from 'react';
+import Controls from './Controls';
 
-const Header = () => {
 
-    return <div>1</div>
+const Header: FC = ({}) => {
+
+    const computePath = () => {
+
+    }
+
+    return <div>
+        <Controls computePath={computePath}/>
+    </div>
 }
 
 export default Header;
