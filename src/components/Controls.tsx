@@ -1,7 +1,6 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {Dispatch, FC, SetStateAction, useEffect, useState} from 'react';
 import {Button, message, Radio} from 'antd';
 import {BUTTON_WIDTH, STAGE_SIZE} from '../consts';
-import {getAllFileNames, getFileById, remove, save} from '../functions/http';
 import {observable, runInAction} from 'mobx';
 import graphStore from '../stores/GraphStore';
 import Point from '../classes/Point';
@@ -10,8 +9,22 @@ import {observer} from 'mobx-react-lite';
 import fileStore from "../stores/FileStore";
 import {MenuItem, Select} from "@mui/material";
 import {ComputeMethods} from "../enums";
+import Graph from "../classes/Graph";
+import Highlighter from "./Highlighter";
 
-const Controls: FC = observer(() => {
+interface ControlsProps {
+    path: number[]
+    setPath: Dispatch<SetStateAction<number[]>>
+    distance: number | undefined
+    setDistance: Dispatch<SetStateAction<number | undefined>>
+}
+
+const Controls: FC<ControlsProps> = observer(({
+                                                  path,
+                                                  setPath,
+                                                  distance,
+                                                  setDistance
+                                              }) => {
 
     const [fromPointKey, setFromPointKey] = useState<string>('')
     const [toPointKey, setToPointKey] = useState<string>('')
@@ -35,8 +48,8 @@ const Controls: FC = observer(() => {
 
     const addConnection = () => {
         if (fromPointKey && toPointKey) {
-            const from = graphStore.getPointByKey(fromPointKey)
-            const to = graphStore.getPointByKey(toPointKey)
+            const from = graphStore.findPointByKey(fromPointKey)
+            const to = graphStore.findPointByKey(toPointKey)
             if (from && to) graphStore.addConnection(from, to)
         }
     }
@@ -44,7 +57,7 @@ const Controls: FC = observer(() => {
     const download = () => {
         fileStore.getFileByName(selectedFile).then(data => {
             if (Array.isArray(data)) {
-                parsePointsAndConnections(data)
+                graphStore.parseFromIncidenceMatrix(data)
             }
         })
     }
@@ -58,60 +71,27 @@ const Controls: FC = observer(() => {
     }
 
     const deleteFile = () => {
-        remove(selectedFile).then(() => {
-            // setFiles([...files.filter((file) => file.name !== selectedFile)])
+        fileStore.remove(selectedFile).then(() => {
             setSelectedFile('')
         })
     }
 
-    const parsePointsAndConnections = (matrix: any[][]) => {
-        const points: Point[] = []
-        for (let i = 0; i < matrix.length; i++) {
-            if (i === 0) {
-                const connections: Connection[] = []
-                for (let j = 0; j < matrix[i].length; j++) {
-                    if (j > 0) {
-                        const newConnection = new Connection(
-                            matrix[i][j].from,
-                            matrix[i][j].to,
-                            matrix[i][j].weight,
-                            matrix[i][j].colour,
-                            matrix[i][j].key
-                        )
-                        connections.push(newConnection)
-                    }
-                }
-                runInAction(() => graphStore.connections = observable.array<Connection>(connections))
-            } else {
-                const newPoint = new Point(
-                    matrix[i][0].x,
-                    matrix[i][0].y,
-                    matrix[i][0].key,
-                    matrix[i][0].colour
-                )
-                points.push(newPoint)
-            }
-        }
-        runInAction(() => graphStore.points = observable.array<Point>(points))
-    }
-
     const computePath = () => {
-        console.log(graphStore.adjacencyMatrix);
-        // connectionMatrix = getMatrixValues(connectionMatrix)
-        //
-        // try {
-        //     let startIndex = 0, finishIndex = 0
-        //     points.forEach((point, index) => {
-        //         if (point.key === fromPoint) startIndex = index
-        //         if (point.key === toPoint) finishIndex = index
-        //     })
-        //
-        //     const [distance, path] = Graph.computePath(connectionMatrix, startIndex, finishIndex, selectedMethod)
-        //     setDistance(distance)
-        //     setPath(path)
-        // } catch (e) {
-        //     message.error(e).then()
-        // }
+        const matrix = Graph.adjacencyMatrixValues()
+
+        try {
+            let startIndex = 0, finishIndex = 0
+            graphStore.points.forEach((point, index) => {
+                if (point.key === fromPointKey) startIndex = index
+                if (point.key === toPointKey) finishIndex = index
+            })
+
+            const [distance, path] = Graph.computePath(matrix, startIndex, finishIndex, selectedMethod)
+            setDistance(distance)
+            setPath(path)
+        } catch (error: any) {
+            message.error(error).then()
+        }
     }
 
     const clear = () => {
@@ -238,6 +218,7 @@ const Controls: FC = observer(() => {
                 Флойд
             </Radio.Button>
         </Radio.Group>
+        <Highlighter distance={distance} path={path} compareResult={''} setConnections={''} setPoints={''}/>
     </div>
 })
 

@@ -13,6 +13,38 @@ class GraphStore {
     }
 
     @action
+    parseFromIncidenceMatrix(matrix: any[][]) {
+        const points: Point[] = []
+        for (let i = 0; i < matrix.length; i++) {
+            if (i === 0) {
+                const connections: Connection[] = []
+                for (let j = 0; j < matrix[i].length; j++) {
+                    if (j > 0) {
+                        const newConnection = new Connection(
+                            matrix[i][j].from,
+                            matrix[i][j].to,
+                            matrix[i][j].weight,
+                            matrix[i][j].colour,
+                            matrix[i][j].key
+                        )
+                        connections.push(newConnection)
+                    }
+                }
+                graphStore.connections = observable.array<Connection>(connections)
+            } else {
+                const newPoint = new Point(
+                    matrix[i][0].x,
+                    matrix[i][0].y,
+                    matrix[i][0].key,
+                    matrix[i][0].colour
+                )
+                points.push(newPoint)
+            }
+        }
+        graphStore.points = observable.array<Point>(points)
+    }
+
+    @action
     addPoint(x: number, y: number): void {
         if (this.points.length < 10) {
             const newPoint = new Point(x, y, String(new Date().getTime()))
@@ -22,7 +54,7 @@ class GraphStore {
 
     @action
     addConnection(from: Point, to: Point): void {
-        if (!this.checkExist(from, to)) {
+        if (!this.checkConnectionExist(from, to)) {
             const newConnection = new Connection(from, to, 1, Connection.BASE_COLOR, String(new Date().getTime()))
             this.connections.push(newConnection)
         }
@@ -77,7 +109,7 @@ class GraphStore {
 
     @action
     deletePoint(key: string): void {
-        const point = this.points.find(point => point.key === key)!
+        const point = this.findPointByKey(key)!
         const index = this.points.indexOf(point)
         this.points.splice(index, 1)
         const connections = this.findConnectionsByPointKey(key)
@@ -94,7 +126,7 @@ class GraphStore {
 
     /** Матрица инцидентности */
     @computed
-    get incidenceMatrix(): any[] {
+    get incidenceMatrix(): any[][] {
         const rows: any[] = [[{name: ''}], ...this.points.map(point => [point])]
         for (let i = 0; i < this.connections.length; i++) {
             const {from, to} = this.connections[i]
@@ -113,8 +145,8 @@ class GraphStore {
 
     /** Матрица смежности */
     @computed
-    get adjacencyMatrix(): any {
-        const matrix: any[][] = [[{}]]
+    get adjacencyMatrix(): any[][] {
+        const matrix: any[][] = [[null]]
         for (let i = 0; i < this.points.length; i++) {
             matrix[0].push(this.points[i])
             matrix.push([this.points[i], ...new Array(this.points.length).fill(0)])
@@ -125,37 +157,14 @@ class GraphStore {
                 if (connection) {
                     matrix[i][j] = connection.weight
                     matrix[j][i] = connection.weight
-                }
+                } else matrix[i][j] = Infinity
             }
         }
-        console.log(matrix)
-        // matrixConnection[0].shift()
-        //
-        // const connections = matrix[0].map(row => {
-        //     let conn = {...row}
-        //     delete conn.name
-        //     return row
-        // })
-        // connections.shift()
-        //
-        // for (let i = 0; i < connections.length; i++) {
-        //     let j, k
-        //     matrixConnection[0].forEach((point, index) => {
-        //         if (point.key === connections[i].from) j = index
-        //     })
-        //     matrixConnection[0].forEach((point, index) => {
-        //         if (point.key === connections[i].to) k = index
-        //     })
-        //     matrixConnection[j][k] = connections[i].weight
-        //     matrixConnection[k][j] = connections[i].weight
-        // }
-        //
-        // for (let i = 1; i < matrixConnection.length; i++) {
-        //     matrixConnection[i][i] = 0
-        // }
-        //
-        // return matrixConnection
-        return null
+        return matrix
+    }
+
+    findPointByKey(key: string): Point | undefined {
+        return this.points.find(point => point.key === key)
     }
 
     findConnectionsByPointKey(key: string): Connection[] {
@@ -170,11 +179,7 @@ class GraphStore {
         })
     }
 
-    getPointByKey(key: string): Point | undefined {
-        return this.points.find(point => point.key === key)
-    }
-
-    checkExist(from: Point, to: Point): boolean {
+    private checkConnectionExist(from: Point, to: Point): boolean {
         return graphStore.connections.some(connection => {
             return (connection.from.key === from.key && connection.to.key === to.key)
                 || (connection.from.key === to.key && connection.to.key === from.key)

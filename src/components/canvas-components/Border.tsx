@@ -1,11 +1,11 @@
 import React, {FC, Fragment, useLayoutEffect, useState} from 'react';
 import {Circle} from 'react-konva';
 import Anchor from './Anchor';
-import {POINT_SIZE} from '../consts';
-import Point from '../classes/Point';
+import {POINT_SIZE} from '../../consts';
+import Point from '../../classes/Point';
 import Konva from 'konva';
 import {observer} from 'mobx-react-lite';
-import graphStore from '../stores/GraphStore';
+import graphStore from '../../stores/GraphStore';
 import KonvaEventObject = Konva.KonvaEventObject;
 
 interface BorderProps {

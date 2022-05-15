@@ -1,36 +1,35 @@
 import React, {FC, Fragment} from 'react';
-import {Circle} from 'react-konva';
-import {POINT_SIZE} from '../consts';
-import Point from '../classes/Point';
+import graphStore from '../../stores/GraphStore';
 import {observer} from 'mobx-react-lite';
-import graphStore from '../stores/GraphStore';
+import {Text} from 'react-konva';
 import Konva from 'konva';
 import KonvaEventObject = Konva.KonvaEventObject;
 
-const Points: FC = observer(() => {
+const PointTitles: FC = observer(() => {
 
     const pointDragHandler = (event: KonvaEventObject<DragEvent>, key: string): void => {
         const position = event.target.position()
-        graphStore.updatePointCoords(key, position.x, position.y)
+        graphStore.updatePointCoords(key, position.x + 9, position.y + 6)
     }
 
     return <Fragment>
-        {graphStore.points.map((point: Point) => {
-            const {x, y, key, colour} = point
-            return <Circle
+        {graphStore.points.map(point => {
+            const {x, y, key} = point
+            return <Text
                 key={key}
-                x={x}
-                y={y}
-                radius={POINT_SIZE}
-                fill={colour}
+                x={x - 9}
+                y={y - 6}
+                fontSize={16}
+                text={key.substring(key.length - 2)}
+                fill="white"
                 onClick={() => graphStore.selectPoint(key)}
                 onDblClick={() => graphStore.deletePoint(key)}
                 onDragMove={(event) => pointDragHandler(event, key)}
                 draggable
-                perfectDrawEnabled
+                perfectDrawEnabled={false}
             />
         })}
     </Fragment>
 })
 
-export default Points;
+export default PointTitles;

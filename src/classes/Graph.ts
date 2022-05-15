@@ -1,35 +1,36 @@
 import {ComputeMethods} from '../enums';
+import graphStore from "../stores/GraphStore";
 
 export default class Graph {
     static computePath(
         matrix: any[],
-        startPoint: number,
-        finishPoint: number,
+        startPointIndex: number,
+        finishPointIndex: number,
         method: ComputeMethods = ComputeMethods.Dijkstra,
     ) {
         let distances
         let distance
 
         if (method === ComputeMethods.Dijkstra) {
-            distances = this.dijkstra(matrix, startPoint)
-            distance = distances[finishPoint]
+            distances = this.dijkstra(matrix, startPointIndex)
+            distance = distances[finishPointIndex]
         }
         if (method === ComputeMethods.Floyd) {
             distances = this.floyd(matrix)
-            distance = distances[startPoint][finishPoint]
+            distance = distances[startPointIndex][finishPointIndex]
         }
         const paths = this.pathsFromMatrix(matrix)
-        const fullPaths = this.computeFullPaths(paths, startPoint)
+        const fullPaths = this.computeFullPaths(paths, startPointIndex)
 
-        if (fullPaths[finishPoint][0] !== undefined) {
-            const path = fullPaths[finishPoint]
+        if (fullPaths[finishPointIndex][0] !== undefined) {
+            const path = fullPaths[finishPointIndex]
             return [distance, path]
         } else {
             return [Infinity, []]
         }
     }
 
-    static dijkstra(matrix: any[], startPointIndex: number | undefined) {
+    static dijkstra(matrix: number[][], startPointIndex: number | undefined) {
         if (startPointIndex !== undefined) return this.dijkstraPoint(matrix, startPointIndex)
         else {
             let distances = []
@@ -42,7 +43,7 @@ export default class Graph {
         }
     }
 
-    static floyd(matrix: any[]) {
+    static floyd(matrix: number[][]) {
         let matrixCopy = this.copyMatrix(matrix)
 
         for (let k = 0; k < matrixCopy.length; k++) {
@@ -63,7 +64,7 @@ export default class Graph {
         return matrixCopy
     }
 
-    static dijkstraPoint(matrix: any[], startPointIndex: number) {
+    static dijkstraPoint(matrix: number[][], startPointIndex: number) {
         let i: number | undefined = startPointIndex
         let viewed = [startPointIndex]
         let result = new Array(matrix.length).fill(Infinity)
@@ -93,7 +94,16 @@ export default class Graph {
         return nextPoint
     }
 
-    private static copyMatrix(matrix: any[]): any[] {
+    static adjacencyMatrixValues(): number[][] {
+        const matrixValues = this.copyMatrix(graphStore.adjacencyMatrix)
+        matrixValues.shift()
+        matrixValues.forEach(row => {
+            row.shift()
+        })
+        return matrixValues
+    }
+
+    private static copyMatrix(matrix: any[]): any[][] {
         let matrixCopy = JSON.parse(JSON.stringify(matrix))
         for (let i = 0; i < matrixCopy.length; i++) {
             for (let j = 0; j < matrixCopy.length; j++) {

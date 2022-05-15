@@ -1,10 +1,22 @@
-import React, {FC} from 'react';
+import React, {Dispatch, FC, SetStateAction} from 'react';
 import Controls from './Controls';
 
-const Header: FC = ({}) => {
+interface HeaderProps {
+    path: number[]
+    setPath: Dispatch<SetStateAction<number[]>>
+    distance: number | undefined
+    setDistance: Dispatch<SetStateAction<number | undefined>>
+}
+
+const Header: FC<HeaderProps> = ({
+                                     path,
+                                     setPath,
+                                     distance,
+                                     setDistance
+                                 }) => {
 
     return <div>
-        <Controls/>
+        <Controls path={path} setPath={setPath} distance={distance} setDistance={setDistance}/>
     </div>
 }
 

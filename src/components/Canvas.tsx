@@ -1,22 +1,22 @@
 import React, {Dispatch, FC, ReactElement, ReactNode, SetStateAction, useRef, useState} from 'react';
 import {Layer, Line, Stage} from 'react-konva';
-import Border from './Border';
+import Border from './canvas-components/Border';
 import {STAGE_SIZE} from '../consts';
 import Connection from '../classes/Connection';
 import Point from '../classes/Point';
 import Konva from 'konva';
-import Points from './Points';
+import Points from './canvas-components/Points';
 import {message} from 'antd';
 import {observer} from 'mobx-react-lite';
 import graphStore from '../stores/GraphStore';
-import Connections from './Connections';
-import ConnectionWeights from './ConnectionWeights';
-import ConnectionPreview from './ConnectionPreview';
-import ConnectionWeightValues from './ConnectionWeightValues';
-import PointTitles from './PointTitles';
+import Connections from './canvas-components/Connections';
+import ConnectionWeights from './canvas-components/ConnectionWeights';
+import ConnectionPreview from './canvas-components/ConnectionPreview';
+import ConnectionWeightValues from './canvas-components/ConnectionWeightValues';
+import PointTitles from './canvas-components/PointTitles';
 import CanvasHandler from '../classes/CanvasHandler';
-import KonvaEventObject = Konva.KonvaEventObject;
 import {runInAction} from 'mobx';
+import KonvaEventObject = Konva.KonvaEventObject;
 
 interface CanvasProps {
     setCanvasMenuVisible: Dispatch<SetStateAction<boolean>>

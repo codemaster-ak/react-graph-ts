@@ -5,7 +5,6 @@ import {FileI} from "../interfaces";
 
 class FileStore {
     @observable files = observable.array<FileI>([])
-    fileContent: any[] = []//todo ??
 
     constructor() {
         makeObservable(this)
@@ -34,7 +33,13 @@ class FileStore {
 
     @action
     async remove(name: string): Promise<void> {
-        await axios.delete(Urls.deleteFile + name)
+        axios.delete(Urls.deleteFile + name).then(response => {
+            if (response.status === 200) {
+                const file = this.files.find(file => file.name === name)!
+                const index = this.files.indexOf(file)
+                this.files.splice(index, 1)
+            }
+        })
     }
 }
 

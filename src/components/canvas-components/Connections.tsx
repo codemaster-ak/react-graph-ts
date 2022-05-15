@@ -1,7 +1,7 @@
 import React, {FC, Fragment} from 'react';
-import graphStore from '../stores/GraphStore';
+import graphStore from '../../stores/GraphStore';
 import Konva from 'konva';
-import Connection from '../classes/Connection';
+import Connection from '../../classes/Connection';
 import {Line} from 'react-konva';
 import {observer} from 'mobx-react-lite';
 import KonvaEventObject = Konva.KonvaEventObject;

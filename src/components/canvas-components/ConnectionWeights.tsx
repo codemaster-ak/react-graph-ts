@@ -1,7 +1,7 @@
 import React, {FC, Fragment} from 'react';
-import Connection from '../classes/Connection';
+import Connection from '../../classes/Connection';
 import {Circle} from 'react-konva';
-import graphStore from '../stores/GraphStore';
+import graphStore from '../../stores/GraphStore';
 import Konva from 'konva';
 import {observer} from 'mobx-react-lite';
 

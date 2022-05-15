@@ -1,8 +1,8 @@
 import React, {FC, Fragment} from 'react';
 import {observer} from 'mobx-react-lite';
-import graphStore from '../stores/GraphStore';
+import graphStore from '../../stores/GraphStore';
 import {Text} from 'react-konva';
-import Connection from '../classes/Connection';
+import Connection from '../../classes/Connection';
 import Konva from 'konva';
 
 const ConnectionWeightValues: FC = observer(() => {

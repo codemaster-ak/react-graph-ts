@@ -1,7 +1,7 @@
 import React, {FC, useRef} from 'react';
 import {Circle} from 'react-konva';
 import Konva from 'konva';
-import Point from '../classes/Point';
+import Point from '../../classes/Point';
 import KonvaEventObject = Konva.KonvaEventObject;
 
 interface AnchorProps {

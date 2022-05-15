@@ -6,7 +6,7 @@ import {observer} from 'mobx-react-lite';
 interface DropDownMenuProps {
     visible: boolean
     setVisible: Dispatch<SetStateAction<boolean>>
-    canvasMenuStyle: object
+    canvasMenuStyle?: object
 }
 
 const CanvasMenu: FC<DropDownMenuProps> = observer(({visible, setVisible, canvasMenuStyle}) => {
