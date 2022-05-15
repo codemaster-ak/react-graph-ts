@@ -1,1 +1,3 @@
-export {}
+export interface FileI {
+    name: string
+}

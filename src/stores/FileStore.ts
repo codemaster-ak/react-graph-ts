@@ -1,37 +1,40 @@
 import {action, makeObservable, observable} from 'mobx';
-import {BASE_INIT, BASE_URL, HTTP_METHODS} from '../consts';
 import axios from "axios";
 import {Urls} from "../enums";
-
-interface FileI {
-    name: string
-}
+import {FileI} from "../interfaces";
 
 class FileStore {
     @observable files = observable.array<FileI>([])
+    fileContent: any[] = []//todo ??
 
     constructor() {
         makeObservable(this)
     }
 
     @action
-    async getAllFileNames() {
+    async getAllFileNames(): Promise<void> {
         const files = await axios.get<FileI[]>(Urls.getAllFiles)
         this.files = observable.array(files.data)
     }
 
+    async getFileByName(name: string): Promise<any[]> {
+        const fileContent = await axios.get<any[]>(Urls.getFileByName + name)
+        return fileContent.data
+    }
+
     @action
-    async save(payload: any) {
-        const init = {
-            ...BASE_INIT,
-            method: HTTP_METHODS.POST,
-            body: JSON.stringify(payload),
-        }
-        return await fetch(BASE_URL, init).then(response => {
-            if (response.ok) return response.json()
-        }).then((data) => {
-            return data
-        })
+    async save(payload: any[]): Promise<void> {
+        const fileName = await axios.post<FileI>(Urls.createFile, payload)
+        this.files.push(fileName.data)
+    }
+
+    async update(payload: any[], name: string): Promise<void> {
+        await axios.put(Urls.updateFile + name, payload)
+    }
+
+    @action
+    async remove(name: string): Promise<void> {
+        await axios.delete(Urls.deleteFile + name)
     }
 }
 

@@ -10,14 +10,6 @@ export const HIGHLIGHT_CONNECTION_COLOR: string = '#f00'
 
 export const BASE_URL: string = 'http://127.0.0.1:4000'
 
-export enum HTTP_METHODS {
-    GET = 'GET',
-    POST = 'POST',
-    PUT = 'PUT',
-    DELETE = 'DELETE',
-    OPTIONS = 'OPTIONS'
-}
-
 export const BASE_INIT: object = {
     mode: 'cors',
     headers: {

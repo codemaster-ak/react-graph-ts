@@ -95,7 +95,7 @@ class GraphStore {
     /** Матрица инцидентности */
     @computed
     get incidenceMatrix(): any[] {
-        let rows: any[] = [[{name: ''}], ...this.points.map(point => [point])]
+        const rows: any[] = [[{name: ''}], ...this.points.map(point => [point])]
         for (let i = 0; i < this.connections.length; i++) {
             const {from, to} = this.connections[i]
             for (let j = 0; j < rows.length; j++) {
@@ -114,18 +114,21 @@ class GraphStore {
     /** Матрица смежности */
     @computed
     get adjacencyMatrix(): any {
-        // let matrixConnection = []
-        // console.log(matrix)
-        // for (let i = 0; i < matrix.length; i++) {
-        //     matrixConnection.push([matrix[i][0]])
-        // }
-        //
-        // for (let i = 0; i < matrix.length; i++) {
-        //     matrixConnection[0].push(matrix[i][0])
-        //     for (let j = 1; j <= matrix.length - 1; j++) {
-        //         if (i > 0) matrixConnection[i].push(Infinity)
-        //     }
-        // }
+        const matrix: any[][] = [[{}]]
+        for (let i = 0; i < this.points.length; i++) {
+            matrix[0].push(this.points[i])
+            matrix.push([this.points[i], ...new Array(this.points.length).fill(0)])
+        }
+        for (let i = 1; i < matrix.length; i++) {
+            for (let j = 1; j <= matrix.length - 1; j++) {
+                const connection = this.findConnectionByPoints(matrix[0][j], matrix[i][0])
+                if (connection) {
+                    matrix[i][j] = connection.weight
+                    matrix[j][i] = connection.weight
+                }
+            }
+        }
+        console.log(matrix)
         // matrixConnection[0].shift()
         //
         // const connections = matrix[0].map(row => {
@@ -158,6 +161,12 @@ class GraphStore {
     findConnectionsByPointKey(key: string): Connection[] {
         return this.connections.filter(connection => {
             return connection.from.key === key || connection.to.key === key
+        })
+    }
+
+    findConnectionByPoints(from: Point, to: Point): Connection | undefined {
+        return this.connections.find(connection => {
+            return connection.from.key === from.key && connection.to.key === to.key
         })
     }
 
