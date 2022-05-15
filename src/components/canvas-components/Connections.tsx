@@ -5,6 +5,7 @@ import Connection from '../../classes/Connection';
 import {Line} from 'react-konva';
 import {observer} from 'mobx-react-lite';
 import KonvaEventObject = Konva.KonvaEventObject;
+import CanvasHandler from "../../classes/CanvasHandler";
 
 interface ConnectionsProps {
     onClickHandler: (event: KonvaEventObject<PointerEvent>, connection: Connection) => void
@@ -12,23 +13,20 @@ interface ConnectionsProps {
 
 const Connections: FC<ConnectionsProps> = observer(({onClickHandler}) => {
 
-    const createConnectionPoints = (source: Konva.Vector2d, destination: Konva.Vector2d) => {
-        return [source.x, source.y, destination.x, destination.y]
-    }
-
     return <Fragment>
         {graphStore.connections.map(connection => {
+            const {from, to, colour, key} = connection
             const lineEnd = {
-                x: connection.to.x - connection.from.x,
-                y: connection.to.y - connection.from.y,
+                x: to.x - from.x,
+                y: to.y - from.y,
             }
-            const connectionPoints = createConnectionPoints({x: 0, y: 0}, lineEnd)
+            const connectionPoints = CanvasHandler.createConnectionPoints({x: 0, y: 0}, lineEnd)
             return <Line
-                key={connection.from.key + connection.to.key + Math.random()}
-                x={connection.from.x}
-                y={connection.from.y}
+                key={key}
+                x={from.x}
+                y={from.y}
                 points={connectionPoints}
-                stroke={connection.colour}
+                stroke={colour}
                 strokeWidth={3}
                 hitStrokeWidth={5}
                 onClick={(event: KonvaEventObject<PointerEvent>) => onClickHandler(event, connection)}

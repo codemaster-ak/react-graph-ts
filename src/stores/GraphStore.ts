@@ -1,6 +1,8 @@
 import {action, computed, makeObservable, observable} from 'mobx';
 import Point from '../classes/Point';
 import Connection from '../classes/Connection';
+import {ConnectionColours, PointColours} from "../enums";
+import {AdjacencyMatrixI, IncidenceMatrixI} from "../interfaces";
 
 class GraphStore {
     @observable selectedPoint: Point | null = null
@@ -35,8 +37,8 @@ class GraphStore {
                 const newPoint = new Point(
                     matrix[i][0].x,
                     matrix[i][0].y,
-                    matrix[i][0].key,
-                    matrix[i][0].colour
+                    matrix[i][0].colour,
+                    matrix[i][0].key
                 )
                 points.push(newPoint)
             }
@@ -47,7 +49,7 @@ class GraphStore {
     @action
     addPoint(x: number, y: number): void {
         if (this.points.length < 10) {
-            const newPoint = new Point(x, y, String(new Date().getTime()))
+            const newPoint = new Point(x, y)
             this.points.push(newPoint)
         } else throw new Error('Достигнуто максимальное количество вершин - 10')
     }
@@ -55,7 +57,7 @@ class GraphStore {
     @action
     addConnection(from: Point, to: Point): void {
         if (!this.checkConnectionExist(from, to)) {
-            const newConnection = new Connection(from, to, 1, Connection.BASE_COLOR, String(new Date().getTime()))
+            const newConnection = new Connection(from, to)
             this.connections.push(newConnection)
         }
     }
@@ -70,7 +72,7 @@ class GraphStore {
     updatePointCoords(key: string, x: number, y: number): void {
         for (let i = 0; i < this.points.length; i++) {
             if (this.points[i].key === key) {
-                this.points[i] = new Point(x, y, key, this.points[i].colour)
+                this.points[i] = new Point(x, y, this.points[i].colour, key)
                 // this.points[i].x = x
                 // this.points[i].y = y
                 this.updateConnections(this.points[i])
@@ -108,6 +110,28 @@ class GraphStore {
     }
 
     @action
+    changePointsColour(points: Point[], colour: PointColours) {
+        const keys = points.map(point => point.key)
+        for (let i = 0; i < this.points.length; i++) {
+            if (keys.includes(this.points[i].key)) {
+                const {x, y, key} = this.points[i]
+                this.points[i] = new Point(x, y, colour, key)
+            }
+        }
+    }
+
+    @action
+    changeConnectionsColour(connections: Connection[], colour: ConnectionColours) {
+        const keys = connections.map(connection => connection.key)
+        for (let i = 0; i < this.connections.length; i++) {
+            if (keys.includes(this.connections[i].key)) {
+                const {from, to, weight, key} = this.connections[i]
+                this.connections[i] = new Connection(from, to, weight, colour, key)
+            }
+        }
+    }
+
+    @action
     deletePoint(key: string): void {
         const point = this.findPointByKey(key)!
         const index = this.points.indexOf(point)
@@ -126,8 +150,8 @@ class GraphStore {
 
     /** Матрица инцидентности */
     @computed
-    get incidenceMatrix(): any[][] {
-        const rows: any[] = [[{name: ''}], ...this.points.map(point => [point])]
+    get incidenceMatrix(): IncidenceMatrixI {
+        const rows: any[][] = [[{name: ''}], ...this.points.map(point => [point])]
         for (let i = 0; i < this.connections.length; i++) {
             const {from, to} = this.connections[i]
             for (let j = 0; j < rows.length; j++) {
@@ -140,12 +164,12 @@ class GraphStore {
                 }
             }
         }
-        return rows
+        return rows as IncidenceMatrixI
     }
 
     /** Матрица смежности */
     @computed
-    get adjacencyMatrix(): any[][] {
+    get adjacencyMatrix(): AdjacencyMatrixI {
         const matrix: any[][] = [[null]]
         for (let i = 0; i < this.points.length; i++) {
             matrix[0].push(this.points[i])
@@ -160,7 +184,7 @@ class GraphStore {
                 } else matrix[i][j] = Infinity
             }
         }
-        return matrix
+        return matrix as AdjacencyMatrixI
     }
 
     findPointByKey(key: string): Point | undefined {

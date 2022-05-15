@@ -1,9 +1,6 @@
 import React, {FC} from 'react';
 
-interface MatrixContainerProps {
-}
-
-const MatrixContainer: FC<MatrixContainerProps> = ({children}) => {
+const MatrixContainer: FC = ({children}) => {
 
     return <div className="matrix-container">
         {children}

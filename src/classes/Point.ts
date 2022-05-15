@@ -1,19 +1,20 @@
-export default class Point {
-    static readonly BASE_COLOR: string = '#1890ff'
-    static readonly HIGHLIGHTED_COLOR: string = '#f00'
+import {PointColours} from "../enums";
+import {EntityI} from "../interfaces";
+
+export default class Point implements EntityI {
     x: number;
     y: number;
     key: string;
-    colour: string;
+    colour: PointColours;
 
-    constructor(x: number, y: number, key: string, colour = Point.BASE_COLOR) {
-        this.key = key
+    constructor(x: number, y: number, colour: PointColours = PointColours.BASE, key?: string) {
         this.x = x
         this.y = y
         this.colour = colour
+        this.key = key || String(new Date().getTime())
     }
 
-    getPointName() {
+    getName() {
         return this.key.substring(this.key.length - 2)
     }
 }

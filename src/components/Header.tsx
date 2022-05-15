@@ -1,5 +1,6 @@
 import React, {Dispatch, FC, SetStateAction} from 'react';
 import Controls from './Controls';
+import Highlighter from "./Highlighter";
 
 interface HeaderProps {
     path: number[]
@@ -17,6 +18,7 @@ const Header: FC<HeaderProps> = ({
 
     return <div>
         <Controls path={path} setPath={setPath} distance={distance} setDistance={setDistance}/>
+        <Highlighter distance={distance} path={path} compareResult={''}/>
     </div>
 }
 

@@ -1,5 +1,3 @@
-import {BASE_URL} from "./consts";
-
 export enum ComputeMethods {
     Dijkstra = 'Дейкстра',
     Floyd = 'Флойд',
@@ -18,5 +16,15 @@ export enum HTTPMethods {
     POST = 'POST',
     PUT = 'PUT',
     DELETE = 'DELETE',
-    OPTIONS = 'OPTIONS'
+    OPTIONS = 'OPTIONS',
+}
+
+export enum PointColours {
+    BASE = '#1890ff',
+    HIGHLIGHTED = '#f00',
+}
+
+export enum ConnectionColours {
+    BASE = '#656565',
+    HIGHLIGHTED = '#f00',
 }

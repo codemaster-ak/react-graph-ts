@@ -1,68 +1,58 @@
 import React, {FC, useEffect, useState} from 'react';
 import {Button} from 'antd';
-import {highlightConnections, highlightPoints} from '../functions/highlight';
-import {BASE_CONNECTION_COLOR, BUTTON_WIDTH, HIGHLIGHT_CONNECTION_COLOR, HIGHLIGHT_POINT_COLOR} from '../consts';
-import Point from '../classes/Point';
-import Connection from '../classes/Connection';
+import {
+    getConnectionsToHighlight,
+    getConnectionsToStopHighlight,
+    getPointsToHighlight,
+    getPointsToStopHighlight,
+} from '../functions/highlight';
+import {BUTTON_WIDTH} from '../consts';
 import graphStore from "../stores/GraphStore";
+import {ConnectionColours, PointColours} from "../enums";
 
 interface HighlighterProps {
-    setPoints: any
-    setConnections: any
     path: any
     distance: any
     compareResult: any
 }
 
-const Highlighter: FC<HighlighterProps> = ({setPoints, setConnections, path, distance, compareResult}) => {
+const Highlighter: FC<HighlighterProps> = ({path, distance, compareResult}) => {
 
     useEffect(() => {
-        // setInformation(distance !== Infinity && distance !== undefined
-        //     ? 'Путь - ' + getPathValue() + ' ' + '; Длина - ' + distance
-        //     : distance === Infinity && 'Путь не существует',
-        // )
-    }, [distance])
+        if (distance !== Infinity && distance !== undefined) {
+            setInformation(`Путь - ${getPathValue(path)} ; Длина - ${distance}`)
+        } else {
+            if (distance === Infinity) setInformation('Путь не существует')
+        }
+    }, [distance, path])
 
     useEffect(() => {
         setInformation(compareResult)
     }, [compareResult])
 
-
     const [information, setInformation] = useState('')
-    const [pathInput, setPathInput] = useState('')
-    const [highlightToggle, setHighlightToggle] = useState(false)
+    const [highlighting, setHighlighting] = useState<boolean>(false)
 
     const toggleHighlight = () => {
-        if (highlightToggle) {
-            setPoints(graphStore.points.map(point => {
-                if (point.colour === HIGHLIGHT_POINT_COLOR) return new Point(point.x, point.y, point.key)
-                else return point
-            }))
-            setConnections(graphStore.connections.map(connection => {
-                if (connection.colour === HIGHLIGHT_CONNECTION_COLOR) return new Connection(
-                    connection.from,
-                    connection.to,
-                    connection.weight,
-                    BASE_CONNECTION_COLOR,
-                    connection.key,
-                )
-                else return connection
-            }))
+        if (highlighting) {
+            graphStore.changePointsColour(getPointsToStopHighlight(), PointColours.BASE)
+            graphStore.changeConnectionsColour(getConnectionsToStopHighlight(), ConnectionColours.BASE)
         } else {
             if (path.length > 0) {
-                // setSavedGraph({points, connections})
-                setPoints(highlightPoints(path, graphStore.points))
-                setConnections(highlightConnections(path, graphStore.points, graphStore.connections))
+                graphStore.changePointsColour(getPointsToHighlight(path), PointColours.HIGHLIGHTED)
+                graphStore.changeConnectionsColour(
+                    getConnectionsToHighlight(path), ConnectionColours.HIGHLIGHTED
+                )
             }
         }
-        setHighlightToggle(!highlightToggle)
+        setHighlighting(!highlighting)
     }
 
-    const getPathValue = () => {
+    const getPathValue = (path: any[]) => {
         let value = ''
         for (let i = 0; i < path.length; i++) {
-            let key = graphStore.points[path[i]].key
-            value += key.substring(key.length - 2) + ' -> '
+            let point = graphStore.points[path[i]]
+            value += point.getName() + ' -> '
         }
         return value.substring(0, value.length - 4)
     }
@@ -75,7 +65,7 @@ const Highlighter: FC<HighlighterProps> = ({setPoints, setConnections, path, dis
                 disabled={path.length === 0 || distance === Infinity}
                 style={{width: BUTTON_WIDTH}}
             >
-                {highlightToggle ? 'Отключить показ' : 'Показать маршрут'}
+                {highlighting ? 'Отключить показ' : 'Показать маршрут'}
             </Button>
         </div>
         <p

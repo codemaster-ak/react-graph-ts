@@ -10,7 +10,6 @@ import fileStore from "../stores/FileStore";
 import {MenuItem, Select} from "@mui/material";
 import {ComputeMethods} from "../enums";
 import Graph from "../classes/Graph";
-import Highlighter from "./Highlighter";
 
 interface ControlsProps {
     path: number[]
@@ -89,6 +88,7 @@ const Controls: FC<ControlsProps> = observer(({
             const [distance, path] = Graph.computePath(matrix, startIndex, finishIndex, selectedMethod)
             setDistance(distance)
             setPath(path)
+            console.log(distance,path)
         } catch (error: any) {
             message.error(error).then()
         }
@@ -111,7 +111,7 @@ const Controls: FC<ControlsProps> = observer(({
                 >
                     {graphStore.points.map(point => {
                         return <MenuItem value={point.key} key={point.key}>
-                            {point.getPointName()}
+                            {point.getName()}
                         </MenuItem>
                     })}
                 </Select>
@@ -122,7 +122,7 @@ const Controls: FC<ControlsProps> = observer(({
                 >
                     {graphStore.points.map(point => {
                         return <MenuItem value={point.key} key={point.key}>
-                            {point.getPointName()}
+                            {point.getName()}
                         </MenuItem>
                     })}
                 </Select>
@@ -218,7 +218,6 @@ const Controls: FC<ControlsProps> = observer(({
                 Флойд
             </Radio.Button>
         </Radio.Group>
-        <Highlighter distance={distance} path={path} compareResult={''} setConnections={''} setPoints={''}/>
     </div>
 })
 

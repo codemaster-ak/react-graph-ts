@@ -1,19 +1,17 @@
 import React, {FC, useRef} from 'react';
 import {Circle} from 'react-konva';
 import Konva from 'konva';
-import Point from '../../classes/Point';
 import KonvaEventObject = Konva.KonvaEventObject;
 
 interface AnchorProps {
     x: number
     y: number
-    point: Point
-    dragStartHandler: (event: KonvaEventObject<DragEvent>, id: string) => void
-    dragMoveHandler: (event: KonvaEventObject<DragEvent>, id: string) => void
-    dragEndHandler: (event: KonvaEventObject<DragEvent>, id: Point) => void
+    dragStartHandler: (event: KonvaEventObject<DragEvent>) => void
+    dragMoveHandler: (event: KonvaEventObject<DragEvent>) => void
+    dragEndHandler: (event: KonvaEventObject<DragEvent>) => void
 }
 
-const Anchor: FC<AnchorProps> = ({x, y, point, dragStartHandler, dragMoveHandler, dragEndHandler}) => {
+const Anchor: FC<AnchorProps> = ({x, y, dragStartHandler, dragMoveHandler, dragEndHandler}) => {
 
     const anchor = useRef<Konva.Circle>(null)
 
@@ -31,9 +29,9 @@ const Anchor: FC<AnchorProps> = ({x, y, point, dragStartHandler, dragMoveHandler
         radius={5}
         fill="#656565"
         draggable
-        onDragStart={event => dragStartHandler(event, point.key)}
-        onDragMove={event => dragMoveHandler(event, point.key)}
-        onDragEnd={event => dragEndHandler(event, point)}
+        onDragStart={event => dragStartHandler(event)}
+        onDragMove={event => dragMoveHandler(event)}
+        onDragEnd={event => dragEndHandler(event)}
         dragBoundFunc={() => dragBounds(anchor)}
         perfectDrawEnabled={false}
     />

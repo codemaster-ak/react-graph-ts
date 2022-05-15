@@ -2,16 +2,15 @@ import React, {FC, Fragment, useLayoutEffect, useState} from 'react';
 import {Circle} from 'react-konva';
 import Anchor from './Anchor';
 import {POINT_SIZE} from '../../consts';
-import Point from '../../classes/Point';
 import Konva from 'konva';
 import {observer} from 'mobx-react-lite';
 import graphStore from '../../stores/GraphStore';
 import KonvaEventObject = Konva.KonvaEventObject;
 
 interface BorderProps {
-    onAnchorDragStart: (event: KonvaEventObject<DragEvent>, id: string) => void
-    onAnchorDragMove: (event: KonvaEventObject<DragEvent>, id: string) => void
-    onAnchorDragEnd: (event: KonvaEventObject<DragEvent>, point: Point) => void
+    onAnchorDragStart: (event: KonvaEventObject<DragEvent>) => void
+    onAnchorDragMove: (event: KonvaEventObject<DragEvent>) => void
+    onAnchorDragEnd: (event: KonvaEventObject<DragEvent>) => void
 }
 
 const Border: FC<BorderProps> = observer(({
@@ -58,7 +57,6 @@ const Border: FC<BorderProps> = observer(({
         {selectedPoint && anchorPoints.map((position, index) => {
             return <Anchor
                 key={index}
-                point={selectedPoint}
                 x={position.x}
                 y={position.y}
                 dragStartHandler={onAnchorDragStart}

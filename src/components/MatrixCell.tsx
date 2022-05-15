@@ -2,15 +2,14 @@ import React, {FC} from 'react';
 import {InputNumber} from 'antd';
 import Point from '../classes/Point';
 import Connection from '../classes/Connection';
-import {IncidenceMatrixCell} from '../types';
 import graphStore from '../stores/GraphStore';
 import {observer} from 'mobx-react-lite';
+import {IncidenceMatrixCell} from "../interfaces";
 
 interface MatrixCellProps {
     row: number
     col: number
     cell: IncidenceMatrixCell
-    changeWeight: (value: number, row: number, col: number) => void
 }
 
 const MatrixCell: FC<MatrixCellProps> = observer(({
@@ -20,8 +19,8 @@ const MatrixCell: FC<MatrixCellProps> = observer(({
                                                   }) => {
 
     const getCellText = (cell: IncidenceMatrixCell): string => {
-        if (cell instanceof Connection) return cell.getConnectionName()
-        else if (cell instanceof Point) return cell.getPointName()
+        if (cell instanceof Connection) return cell.getName()
+        else if (cell instanceof Point) return cell.getName()
         else return ''
     }
 

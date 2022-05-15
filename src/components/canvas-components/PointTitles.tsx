@@ -20,7 +20,7 @@ const PointTitles: FC = observer(() => {
                 x={x - 9}
                 y={y - 6}
                 fontSize={16}
-                text={key.substring(key.length - 2)}
+                text={point.getName()}
                 fill="white"
                 onClick={() => graphStore.selectPoint(key)}
                 onDblClick={() => graphStore.deletePoint(key)}

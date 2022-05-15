@@ -8,24 +8,24 @@ export default class CanvasHandler {
         return [source.x, source.y, destination.x, destination.y]
     }
 
-    static hasIntersection(position: Konva.Vector2d, point: Point) {
-        const radius = Math.sqrt(Math.pow(position.x - point.x, 2) + Math.pow(position.x - point.x, 2))
+    static hasIntersection(position: Konva.Vector2d, target: Point) {
+        const radius = Math.sqrt(Math.pow(position.x - target.x, 2) + Math.pow(position.y - target.y, 2))
         return POINT_SIZE - radius > 0
     }
 
-    static getConnectionCoords(fromPoint: Point, toPoint: Point) {
+    static getConnectionCoords(from: Point, to: Point) {
         let x, y
-        if (toPoint.x > fromPoint.x) {
-            x = fromPoint.x + (toPoint.x - fromPoint.x) / 2
+        if (to.x > from.x) {
+            x = from.x + (to.x - from.x) / 2
         } else {
-            x = toPoint.x + (fromPoint.x - toPoint.x) / 2
+            x = to.x + (from.x - to.x) / 2
         }
-        if (toPoint.y > fromPoint.y) {
-            y = fromPoint.y + (toPoint.y - fromPoint.y) / 2
+        if (to.y > from.y) {
+            y = from.y + (to.y - from.y) / 2
         } else {
-            y = toPoint.y + (fromPoint.y - toPoint.y) / 2
+            y = to.y + (from.y - to.y) / 2
         }
-        return [x, y]
+        return {x, y}
     }
 
     static getMousePos(event: Konva.KonvaEventObject<any>): Konva.Vector2d {
@@ -38,41 +38,9 @@ export default class CanvasHandler {
         }
     }
 
-    static detectConnection(position: Konva.Vector2d, point: Point): Point | undefined {
-        return graphStore.points.find((p: Point) => {
-            return p.key !== point.key && this.hasIntersection(position, p)
+    static detectConnection(position: Konva.Vector2d, from: Point): Point | undefined {
+        return graphStore.points.find(point => {
+            return point.key !== from.key && this.hasIntersection(position, point)
         })
     }
 }
-
-/*
-
-export function highlightPoints(path: number[], points: Point[]) {
-    return points.map((point: Point, index: number) => {
-        if (path.includes(index)) return new Point(point.x, point.y, point.key, HIGHLIGHT_POINT_COLOR)
-        return point
-    })
-}
-
-export function highlightConnections(path: number[], points: Point[], connections: Connection[]) {
-    let connectionsCopy = JSON.parse(JSON.stringify(connections))
-    for (let i = 0; i < path.length - 1; i++) {
-        const fromPoint = points[path[i]]
-        const toPoint = points[path[i + 1]]
-        for (let j = 0; j < connectionsCopy.length; j++) {
-            if ((connectionsCopy[j].from === fromPoint.key && connectionsCopy[j].to === toPoint.key) ||
-                (connectionsCopy[j].from === toPoint.key && connectionsCopy[j].to === fromPoint.key)) {
-                connectionsCopy[j].colour = HIGHLIGHT_CONNECTION_COLOR
-            }
-        }
-    }
-    return connectionsCopy.map((connection: Connection) => new Connection(
-        connection.from,
-        connection.to,
-        connection.weight,
-        connection.colour,
-        connection.key,
-    ))
-}
-
-* */

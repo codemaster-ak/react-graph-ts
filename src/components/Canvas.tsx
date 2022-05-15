@@ -61,9 +61,10 @@ const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuSt
         }
     }
 
-    const addConnection = (mousePos: Konva.Vector2d, point: Point): void => {
-        const targetPoint = CanvasHandler.detectConnection(mousePos, point)
-        if (targetPoint) graphStore.addConnection(point, targetPoint)
+    const addConnection = (mousePos: Konva.Vector2d, from: Point): void => {
+        const target = CanvasHandler.detectConnection(mousePos, from)
+        // console.log(from, target)
+        if (target) graphStore.addConnection(from, target)
     }
 
     const anchorDragStartHandler = (event: KonvaEventObject<DragEvent>) => {
