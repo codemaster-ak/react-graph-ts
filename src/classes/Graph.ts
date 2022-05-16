@@ -30,7 +30,7 @@ export default class Graph {
         }
     }
 
-    static dijkstra(matrix: number[][], startPointIndex: number | undefined) {
+    static dijkstra(matrix: number[][], startPointIndex?: number) {
         if (startPointIndex !== undefined) return this.dijkstraPoint(matrix, startPointIndex)
         else {
             let distances = []
@@ -115,7 +115,7 @@ export default class Graph {
         return matrixCopy
     }
 
-    private static pathsFromMatrix(matrix: any[]): any[] {
+    static pathsFromMatrix(matrix: number[][]): any[] {
         let paths = []
         for (let i = 0; i < matrix.length; i++) {
             let j: number | undefined = i
@@ -140,7 +140,7 @@ export default class Graph {
         return paths
     }
 
-    static computeFullPaths(paths: any[], startPoint: number | undefined): any[] {
+    static computeFullPaths(paths: any[], startPoint?: number): any[] {
         let allFullPaths = []
 
         for (let i = 0; i < paths.length; i++) {
@@ -165,5 +165,19 @@ export default class Graph {
         }
 
         return startPoint !== undefined ? allFullPaths[startPoint] : allFullPaths
+    }
+
+    static compareMethods(matrix: number[][], cyclesCount = 10000): { dijkstra: number, floyd: number } {
+        const dijkstraStart = new Date().getTime()
+        for (let i = 0; i < cyclesCount; i++) {
+            this.dijkstra(matrix)
+        }
+        const dijkstraFinish = new Date().getTime()
+        const floydStart = new Date().getTime()
+        for (let i = 0; i < cyclesCount; i++) {
+            this.floyd(matrix)
+        }
+        const floydFinish = new Date().getTime()
+        return {dijkstra: dijkstraFinish - dijkstraStart, floyd: floydFinish - floydStart}
     }
 }
