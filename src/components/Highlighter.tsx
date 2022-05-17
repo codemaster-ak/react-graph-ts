@@ -1,14 +1,9 @@
 import React, {FC, useEffect, useState} from 'react';
 import {Button} from 'antd';
-import {
-    getConnectionsToHighlight,
-    getConnectionsToStopHighlight,
-    getPointsToHighlight,
-    getPointsToStopHighlight,
-} from '../functions/highlight';
 import {BUTTON_WIDTH} from '../consts';
 import graphStore from "../stores/GraphStore";
 import {ConnectionColours, PointColours} from "../enums";
+import Painter from "../classes/Painter";
 
 interface HighlighterProps {
     path: any
@@ -35,13 +30,13 @@ const Highlighter: FC<HighlighterProps> = ({path, distance, compareResult}) => {
 
     const toggleHighlight = () => {
         if (highlighting) {
-            graphStore.changePointsColour(getPointsToStopHighlight(), PointColours.BASE)
-            graphStore.changeConnectionsColour(getConnectionsToStopHighlight(), ConnectionColours.BASE)
+            graphStore.changePointsColour(Painter.getPointsToStopHighlight(), PointColours.BASE)
+            graphStore.changeConnectionsColour(Painter.getConnectionsToStopHighlight(), ConnectionColours.BASE)
         } else {
             if (path.length > 0) {
-                graphStore.changePointsColour(getPointsToHighlight(path), PointColours.HIGHLIGHTED)
+                graphStore.changePointsColour(Painter.getPointsToHighlight(path), PointColours.HIGHLIGHTED)
                 graphStore.changeConnectionsColour(
-                    getConnectionsToHighlight(path), ConnectionColours.HIGHLIGHTED
+                    Painter.getConnectionsToHighlight(path), ConnectionColours.HIGHLIGHTED
                 )
             }
         }

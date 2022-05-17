@@ -8,8 +8,10 @@ import Connection from '../classes/Connection';
 import {observer} from 'mobx-react-lite';
 import fileStore from "../stores/FileStore";
 import {MenuItem, Select} from "@mui/material";
-import {ComputeMethods} from "../enums";
+import {ComputeMethods, ConnectionColours} from "../enums";
 import Graph from "../classes/Graph";
+import Painter from "../classes/Painter";
+import Pathfinder from "../classes/Pathfinder";
 
 interface ControlsProps {
     path: number[]
@@ -77,18 +79,16 @@ const Controls: FC<ControlsProps> = observer(({
 
     const computePath = () => {
         const matrix = Graph.adjacencyMatrixValues()
-
         try {
             let startIndex = 0, finishIndex = 0
-            graphStore.points.forEach((point, index) => {
-                if (point.key === fromPointKey) startIndex = index
-                if (point.key === toPointKey) finishIndex = index
-            })
+            for (let i = 0; i < graphStore.points.length; i++) {
+                if (graphStore.points[i].key === fromPointKey) startIndex = i
+                if (graphStore.points[i].key === toPointKey) finishIndex = i
+            }
 
             const [distance, path] = Graph.computePath(matrix, startIndex, finishIndex, selectedMethod)
             setDistance(distance)
             setPath(path)
-            console.log(distance,path)
         } catch (error: any) {
             message.error(error).then()
         }
@@ -196,6 +196,18 @@ const Controls: FC<ControlsProps> = observer(({
                     disabled={!selectedFile}
                 >
                     Удалить
+                </Button>
+                <Button
+                    type="primary"
+                    onClick={() => Painter.animatePath(path)}
+                >
+                    Animate path
+                </Button>
+                <Button
+                    type="primary"
+                    onClick={() => Graph.throughPoints(fromPointKey, toPointKey)}
+                >
+                    path through points
                 </Button>
             </div>
         </div>

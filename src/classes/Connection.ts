@@ -1,6 +1,7 @@
 import Point from './Point';
 import {ConnectionColours} from "../enums";
 import {EntityI} from "../interfaces";
+import Konva from "konva";
 
 export default class Connection implements EntityI {
     from: Point
@@ -26,5 +27,10 @@ export default class Connection implements EntityI {
     getName() {
         const {from, to} = this
         return from.key.substring(from.key.length - 2) + '-' + to.key.substring(to.key.length - 2)
+    }
+
+    getPointsCoords(): number[] {
+        const {from, to} = this
+        return [from.x, from.y, to.x, to.y]
     }
 }

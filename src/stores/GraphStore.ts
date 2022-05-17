@@ -10,12 +10,16 @@ class GraphStore {
     @observable points = observable.array<Point>([])
     @observable connections = observable.array<Connection>([])
 
+    @observable transitionLine: Connection | null = null//todo ??
+
     constructor() {
         makeObservable(this)
     }
 
     @action
-    parseFromIncidenceMatrix(matrix: any[][]) {
+    parseFromIncidenceMatrix(matrix: any[][]): void {
+        graphStore.selectedPoint = null
+        graphStore.selectedConnection = null
         const points: Point[] = []
         for (let i = 0; i < matrix.length; i++) {
             if (i === 0) {
@@ -185,6 +189,10 @@ class GraphStore {
             }
         }
         return matrix as AdjacencyMatrixI
+    }
+
+    findPointByIndex(index: number): Point | undefined {
+        return this.points.find((_, i) => i === index)
     }
 
     findPointByKey(key: string): Point | undefined {

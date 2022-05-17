@@ -1,5 +1,5 @@
 import React, {Dispatch, FC, ReactElement, ReactNode, SetStateAction, useRef, useState} from 'react';
-import {Layer, Line, Stage} from 'react-konva';
+import {Image, Layer, Line, Stage} from 'react-konva';
 import Border from './canvas-components/Border';
 import {STAGE_SIZE} from '../consts';
 import Connection from '../classes/Connection';
@@ -16,7 +16,9 @@ import ConnectionWeightValues from './canvas-components/ConnectionWeightValues';
 import PointTitles from './canvas-components/PointTitles';
 import CanvasHandler from '../classes/CanvasHandler';
 import {runInAction} from 'mobx';
+import Transition from "./canvas-components/Transition";
 import KonvaEventObject = Konva.KonvaEventObject;
+import Package from "./canvas-components/Package";
 
 interface CanvasProps {
     setCanvasMenuVisible: Dispatch<SetStateAction<boolean>>
@@ -26,6 +28,7 @@ interface CanvasProps {
 const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuStyle}) => {
 
     const stageRef = useRef<Konva.Stage>(null)
+
     const [connectionPreview, setConnectionPreview] = useState<ReactElement<ReactNode> | null>(null)
 
     const onClickStageHandler = (event: KonvaEventObject<PointerEvent>): void => {
@@ -112,6 +115,7 @@ const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuSt
         <Layer>
             {/** порядок Border и Points не менять */}
             <Connections onClickHandler={onClickConnectionHandler}/>
+            {/**<Transition/> тут должно быть*/}
             <ConnectionWeights/>
             <ConnectionWeightValues/>
             <ConnectionPreview line={connectionPreview}/>
@@ -122,6 +126,8 @@ const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuSt
             />
             <Points/>
             <PointTitles/>
+            <Transition/>
+            <Package/>
         </Layer>
     </Stage>
 })

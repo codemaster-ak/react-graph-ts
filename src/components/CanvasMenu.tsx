@@ -34,30 +34,35 @@ const CanvasMenu: FC<DropDownMenuProps> = observer(({visible, setVisible, canvas
         }
     }, [visible])
 
+    const menuItems = [
+        {
+            key: "Remove",
+            label: 'Удалить',
+            onClick: deleteConnection
+        }, {
+            key: "ChangeWeight",
+            label: <div className="flex-container">
+                <p style={{marginRight: 8}}>Изменить вес</p>
+                {inputVisible && <div className="flex-container">
+                    <InputNumber
+                        value={weight}
+                        onChange={onChangeHandler}
+                        style={{marginTop: 5, height: 30}}
+                    />
+                    <Button
+                        onClick={() => changeWeight(graphStore.selectedConnection?.key, weight)}
+                        style={{margin: '5px 10px', height: 30}}
+                    >
+                        Применить
+                    </Button>
+                </div>}
+            </div>,
+            onClick: () => setInputVisible(true)
+        },
+    ]
+
     return visible && graphStore.selectedConnection
-        ? <Menu className="canvas-menu" style={canvasMenuStyle}>
-            <Menu.Item key="Remove" onClick={deleteConnection}>
-                Удалить
-            </Menu.Item>
-            <Menu.Item key="ChangeWeight" onClick={() => setInputVisible(true)}>
-                <div className="flex-container">
-                    <p style={{marginRight: 8}}>Изменить вес</p>
-                    {inputVisible && <div className="flex-container">
-                        <InputNumber
-                            value={weight}
-                            onChange={onChangeHandler}
-                            style={{marginTop: 5, height: 30}}
-                        />
-                        <Button
-                            onClick={() => changeWeight(graphStore.selectedConnection?.key, weight)}
-                            style={{margin: '5px 10px', height: 30}}
-                        >
-                            Применить
-                        </Button>
-                    </div>}
-                </div>
-            </Menu.Item>
-        </Menu>
+        ? <Menu items={menuItems} className="canvas-menu" style={canvasMenuStyle}/>
         : null
 })
 

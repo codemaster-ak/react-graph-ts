@@ -4,16 +4,16 @@ import {POINT_SIZE} from '../consts';
 import graphStore from '../stores/GraphStore';
 
 export default class CanvasHandler {
-    static createConnectionPoints(source: Konva.Vector2d, destination: Konva.Vector2d) {
+    static createConnectionPoints(source: Konva.Vector2d, destination: Konva.Vector2d): number[] {
         return [source.x, source.y, destination.x, destination.y]
     }
 
-    static hasIntersection(position: Konva.Vector2d, target: Point) {
+    static hasIntersection(position: Konva.Vector2d, target: Point): boolean {
         const radius = Math.sqrt(Math.pow(position.x - target.x, 2) + Math.pow(position.y - target.y, 2))
         return POINT_SIZE - radius > 0
     }
 
-    static getConnectionCoords(from: Point, to: Point) {
+    static getConnectionCoords(from: Point, to: Point): Konva.Vector2d {
         let x, y
         if (to.x > from.x) {
             x = from.x + (to.x - from.x) / 2

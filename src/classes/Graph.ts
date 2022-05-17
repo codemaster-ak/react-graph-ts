@@ -1,5 +1,6 @@
 import {ComputeMethods} from '../enums';
 import graphStore from "../stores/GraphStore";
+import Point from "./Point";
 
 export default class Graph {
     static computePath(
@@ -179,5 +180,20 @@ export default class Graph {
         }
         const floydFinish = new Date().getTime()
         return {dijkstra: dijkstraFinish - dijkstraStart, floyd: floydFinish - floydStart}
+    }
+
+    static throughPoints(formKey: string, toKey: string, ...points: Point[]) {
+        const matrix = Graph.adjacencyMatrixValues()
+        const paths = Graph.pathsFromMatrix(matrix)
+        const fullPaths = Graph.computeFullPaths(paths)
+        const from = graphStore.findPointByKey(formKey)
+        const to = graphStore.findPointByKey(toKey)
+        fullPaths.map((pathFormPoint: any[], index) => {
+            pathFormPoint.forEach((path: number[]) => {
+                const pointPath = path.map((pointIndex) => graphStore.findPointByIndex(pointIndex))
+                console.log(pointPath.includes(from))
+                console.log(pointPath.includes(to))
+            })
+        })
     }
 }
