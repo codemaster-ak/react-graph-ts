@@ -12,6 +12,8 @@ const Transition = observer(() => {
     return transitionLine
         ? <Line
             ref={ref}
+            x={transitionLine.from.x}
+            y={transitionLine.from.y}
             stroke="#f00"
             strokeWidth={3}
         />

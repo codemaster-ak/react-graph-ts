@@ -2,7 +2,7 @@ import {ConnectionColours, PointColours} from "./enums";
 import Point from "./classes/Point";
 import Connection from "./classes/Connection";
 
-export interface EntityI {
+export interface ShapeI {
     colour: PointColours | ConnectionColours
     key: string
 

@@ -1,4 +1,4 @@
-import React, {FC, Fragment} from 'react';
+import React, {FC, Fragment, ReactChild, ReactElement, ReactNode, RefObject, useEffect, useRef, useState} from 'react';
 import graphStore from '../../stores/GraphStore';
 import Konva from 'konva';
 import Connection from '../../classes/Connection';
@@ -7,11 +7,7 @@ import {observer} from 'mobx-react-lite';
 import KonvaEventObject = Konva.KonvaEventObject;
 import CanvasHandler from "../../classes/CanvasHandler";
 
-interface ConnectionsProps {
-    onClickHandler: (event: KonvaEventObject<PointerEvent>, connection: Connection) => void
-}
-
-const Connections: FC<ConnectionsProps> = observer(({onClickHandler}) => {
+const Connections: FC = observer(() => {
 
     return <Fragment>
         {graphStore.connections.map(connection => {
@@ -29,7 +25,8 @@ const Connections: FC<ConnectionsProps> = observer(({onClickHandler}) => {
                 stroke={colour}
                 strokeWidth={3}
                 hitStrokeWidth={5}
-                onClick={(event: KonvaEventObject<PointerEvent>) => onClickHandler(event, connection)}
+                // onClick={(event: KonvaEventObject<PointerEvent>) => onClickHandler(event, connection)}
+                onDblClick={() => graphStore.deleteConnection(connection.key)}
             />
         })}
     </Fragment>

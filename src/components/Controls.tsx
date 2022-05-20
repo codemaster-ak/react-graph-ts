@@ -1,5 +1,5 @@
 import React, {Dispatch, FC, SetStateAction, useEffect, useState} from 'react';
-import {Button, message, Radio} from 'antd';
+import {Button, message, Radio, Select} from 'antd';
 import {BUTTON_WIDTH, STAGE_SIZE} from '../consts';
 import {observable, runInAction} from 'mobx';
 import graphStore from '../stores/GraphStore';
@@ -7,7 +7,7 @@ import Point from '../classes/Point';
 import Connection from '../classes/Connection';
 import {observer} from 'mobx-react-lite';
 import fileStore from "../stores/FileStore";
-import {MenuItem, Select} from "@mui/material";
+import {MenuItem} from "@mui/material";
 import {ComputeMethods, ConnectionColours} from "../enums";
 import Graph from "../classes/Graph";
 import Painter from "../classes/Painter";
@@ -19,6 +19,8 @@ interface ControlsProps {
     distance: number | undefined
     setDistance: Dispatch<SetStateAction<number | undefined>>
 }
+
+const {Option}=Select
 
 const Controls: FC<ControlsProps> = observer(({
                                                   path,
@@ -106,24 +108,24 @@ const Controls: FC<ControlsProps> = observer(({
             <div className="space-between">
                 <Select
                     value={fromPointKey}
-                    onChange={event => setFromPointKey(event.target.value)}
+                    onChange={event => setFromPointKey(event)}
                     style={{width: 150}}
                 >
                     {graphStore.points.map(point => {
-                        return <MenuItem value={point.key} key={point.key}>
+                        return <Option value={point.key} key={point.key}>
                             {point.getName()}
-                        </MenuItem>
+                        </Option>
                     })}
                 </Select>
                 <Select
                     value={toPointKey}
-                    onChange={event => setToPointKey(event.target.value)}
+                    onChange={event => setToPointKey(event)}
                     style={{width: 150}}
                 >
                     {graphStore.points.map(point => {
-                        return <MenuItem value={point.key} key={point.key}>
+                        return <Option value={point.key} key={point.key}>
                             {point.getName()}
-                        </MenuItem>
+                        </Option>
                     })}
                 </Select>
             </div>
@@ -166,12 +168,12 @@ const Controls: FC<ControlsProps> = observer(({
             <Select
                 style={{width: BUTTON_WIDTH, marginBottom: 10}}
                 value={selectedFile}
-                onChange={event => setSelectedFile(event.target.value)}
+                onChange={value => setSelectedFile(value)}
             >
                 {fileStore.files.map(file => {
-                    return <MenuItem key={file.name} value={file.name}>
+                    return <Option key={file.name} value={file.name}>
                         {file.name}
-                    </MenuItem>
+                    </Option>
                 })}
             </Select>
             <div className="space-between">

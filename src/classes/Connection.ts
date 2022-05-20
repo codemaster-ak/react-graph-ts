@@ -1,9 +1,9 @@
 import Point from './Point';
 import {ConnectionColours} from "../enums";
-import {EntityI} from "../interfaces";
+import {ShapeI} from "../interfaces";
 import Konva from "konva";
 
-export default class Connection implements EntityI {
+export default class Connection implements ShapeI {
     from: Point
     to: Point
     weight: number

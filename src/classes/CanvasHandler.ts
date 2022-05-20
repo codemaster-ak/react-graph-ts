@@ -1,6 +1,5 @@
 import Konva from 'konva';
 import Point from './Point';
-import {POINT_SIZE} from '../consts';
 import graphStore from '../stores/GraphStore';
 
 export default class CanvasHandler {
@@ -10,7 +9,7 @@ export default class CanvasHandler {
 
     static hasIntersection(position: Konva.Vector2d, target: Point): boolean {
         const radius = Math.sqrt(Math.pow(position.x - target.x, 2) + Math.pow(position.y - target.y, 2))
-        return POINT_SIZE - radius > 0
+        return target.radius - radius > 0
     }
 
     static getConnectionCoords(from: Point, to: Point): Konva.Vector2d {

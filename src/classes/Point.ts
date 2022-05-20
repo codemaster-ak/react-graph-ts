@@ -1,7 +1,8 @@
 import {PointColours} from "../enums";
-import {EntityI} from "../interfaces";
+import {ShapeI} from "../interfaces";
 
-export default class Point implements EntityI {
+export default class Point implements ShapeI {
+    readonly radius: number = 20;
     x: number;
     y: number;
     key: string;

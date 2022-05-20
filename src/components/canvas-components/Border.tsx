@@ -1,7 +1,6 @@
 import React, {FC, Fragment, useLayoutEffect, useState} from 'react';
 import {Circle} from 'react-konva';
 import Anchor from './Anchor';
-import {POINT_SIZE} from '../../consts';
 import Konva from 'konva';
 import {observer} from 'mobx-react-lite';
 import graphStore from '../../stores/GraphStore';
@@ -25,20 +24,20 @@ const Border: FC<BorderProps> = observer(({
 
     useLayoutEffect(() => {
         if (selectedPoint) {
-            const {x, y} = selectedPoint
+            const {x, y, radius} = selectedPoint
             const coords = [
                 {
-                    x: x - POINT_SIZE - 10,
+                    x: x - radius - 10,
                     y: y,
                 }, {
-                    x: x + POINT_SIZE + 10,
+                    x: x + radius + 10,
                     y: y,
                 }, {
                     x: x,
-                    y: y - POINT_SIZE - 10,
+                    y: y - radius - 10,
                 }, {
                     x: x,
-                    y: y + POINT_SIZE + 10,
+                    y: y + radius + 10,
                 },
             ]
             setAnchorPoints(coords)
@@ -51,7 +50,7 @@ const Border: FC<BorderProps> = observer(({
             y={selectedPoint.y}
             stroke="#76bdff"
             strokeWidth={5}
-            radius={POINT_SIZE + 1}
+            radius={selectedPoint.radius + 1}
             perfectDrawEnabled={false}
         />}
         {selectedPoint && anchorPoints.map((position, index) => {

@@ -6,7 +6,6 @@ import {AdjacencyMatrixI, IncidenceMatrixI} from "../interfaces";
 
 class GraphStore {
     @observable selectedPoint: Point | null = null
-    @observable selectedConnection: Connection | null = null
     @observable points = observable.array<Point>([])
     @observable connections = observable.array<Connection>([])
 
@@ -19,7 +18,6 @@ class GraphStore {
     @action
     parseFromIncidenceMatrix(matrix: any[][]): void {
         graphStore.selectedPoint = null
-        graphStore.selectedConnection = null
         const points: Point[] = []
         for (let i = 0; i < matrix.length; i++) {
             if (i === 0) {
@@ -87,10 +85,12 @@ class GraphStore {
 
     @action
     changeConnectionWeight(key: string, weight: number): void {
-        for (let i = 0; i < this.connections.length; i++) {
-            if (this.connections[i].key === key) {
-                const {from, to, colour, key} = this.connections[i]
-                this.connections[i] = new Connection(from, to, weight, colour, key)
+        if (weight > 0 && weight < 100){
+            for (let i = 0; i < this.connections.length; i++) {
+                if (this.connections[i].key === key) {
+                    const {from, to, colour, key} = this.connections[i]
+                    this.connections[i] = new Connection(from, to, weight, colour, key)
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {Image} from "react-konva";
 import Konva from "konva";
-import useImage from "../../functions/useImage";
+import useImage from "../../hooks/useImage";
 import graphStore from "../../stores/GraphStore";
 import {observer} from "mobx-react-lite";
 
@@ -13,10 +13,10 @@ const Package = observer(() => {
     const image = useImage('./file.png')
 
     useEffect(() => {
-        anim()
+        animation()
     }, [transitionLine])
 
-    const anim = () => {
+    const animation = () => {
         if (imageRef.current && transitionLine) {
             imageRef.current.to({
                 x: transitionLine.to.x,
@@ -25,7 +25,7 @@ const Package = observer(() => {
             })
         }
     }
-    // console.log(transitionLine)
+
     return transitionLine
         ? <Image
             ref={imageRef}

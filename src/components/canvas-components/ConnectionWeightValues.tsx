@@ -15,7 +15,7 @@ const ConnectionWeightValues: FC = observer(() => {
                     key={key}
                     text={String(weight)}
                     fontSize={20}
-                    x={x - 6}
+                    x={x - 15}
                     y={y - 8}
                     fill="black"
                     perfectDrawEnabled={false}

@@ -1,6 +1,5 @@
 import React, {FC, Fragment} from 'react';
 import {Circle} from 'react-konva';
-import {POINT_SIZE} from '../../consts';
 import Point from '../../classes/Point';
 import {observer} from 'mobx-react-lite';
 import graphStore from '../../stores/GraphStore';
@@ -16,12 +15,12 @@ const Points: FC = observer(() => {
 
     return <Fragment>
         {graphStore.points.map((point: Point) => {
-            const {x, y, key, colour} = point
+            const {x, y, key, colour, radius} = point
             return <Circle
                 key={key}
                 x={x}
                 y={y}
-                radius={POINT_SIZE}
+                radius={radius}
                 fill={colour}
                 onClick={() => graphStore.selectPoint(key)}
                 onDblClick={() => graphStore.deletePoint(key)}

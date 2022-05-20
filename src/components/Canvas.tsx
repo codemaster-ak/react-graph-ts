@@ -1,8 +1,7 @@
-import React, {Dispatch, FC, ReactElement, ReactNode, SetStateAction, useRef, useState} from 'react';
-import {Image, Layer, Line, Stage} from 'react-konva';
+import React, {FC, ReactElement, ReactNode, useRef, useState} from 'react';
+import {Layer, Line, Stage} from 'react-konva';
 import Border from './canvas-components/Border';
 import {STAGE_SIZE} from '../consts';
-import Connection from '../classes/Connection';
 import Point from '../classes/Point';
 import Konva from 'konva';
 import Points from './canvas-components/Points';
@@ -12,20 +11,14 @@ import graphStore from '../stores/GraphStore';
 import Connections from './canvas-components/Connections';
 import ConnectionWeights from './canvas-components/ConnectionWeights';
 import ConnectionPreview from './canvas-components/ConnectionPreview';
-import ConnectionWeightValues from './canvas-components/ConnectionWeightValues';
 import PointTitles from './canvas-components/PointTitles';
 import CanvasHandler from '../classes/CanvasHandler';
 import {runInAction} from 'mobx';
 import Transition from "./canvas-components/Transition";
-import KonvaEventObject = Konva.KonvaEventObject;
 import Package from "./canvas-components/Package";
+import KonvaEventObject = Konva.KonvaEventObject;
 
-interface CanvasProps {
-    setCanvasMenuVisible: Dispatch<SetStateAction<boolean>>
-    setCanvasMenuStyle: Dispatch<SetStateAction<object>>
-}
-
-const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuStyle}) => {
+const Canvas: FC = observer(() => {
 
     const stageRef = useRef<Konva.Stage>(null)
 
@@ -33,22 +26,7 @@ const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuSt
 
     const onClickStageHandler = (event: KonvaEventObject<PointerEvent>): void => {
         if (event.target === stageRef.current) {
-            runInAction(() => {
-                graphStore.selectedPoint = null
-                graphStore.selectedConnection = null
-            })
-        }
-    }
-
-    const onClickConnectionHandler = (event: KonvaEventObject<PointerEvent>, connection: Connection): void => {
-        event.evt.preventDefault()
-        if (graphStore.selectedConnection?.key === connection.key) {
-            runInAction(() => graphStore.selectedConnection = null)
-            setCanvasMenuVisible(false)
-        } else {
-            runInAction(() => graphStore.selectedConnection = connection)
-            setCanvasMenuVisible(true)
-            setCanvasMenuStyle({top: event.evt.clientY, left: event.evt.clientX})
+            runInAction(() => graphStore.selectedPoint = null)
         }
     }
 
@@ -66,7 +44,6 @@ const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuSt
 
     const addConnection = (mousePos: Konva.Vector2d, from: Point): void => {
         const target = CanvasHandler.detectConnection(mousePos, from)
-        // console.log(from, target)
         if (target) graphStore.addConnection(from, target)
     }
 
@@ -114,10 +91,9 @@ const Canvas: FC<CanvasProps> = observer(({setCanvasMenuVisible, setCanvasMenuSt
     >
         <Layer>
             {/** порядок Border и Points не менять */}
-            <Connections onClickHandler={onClickConnectionHandler}/>
+            <Connections/>
             {/**<Transition/> тут должно быть*/}
             <ConnectionWeights/>
-            <ConnectionWeightValues/>
             <ConnectionPreview line={connectionPreview}/>
             <Border
                 onAnchorDragMove={anchorDragMoveHandler}
