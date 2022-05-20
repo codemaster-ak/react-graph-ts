@@ -1,10 +1,9 @@
 import {ComputeMethods} from '../enums';
 import graphStore from "../stores/GraphStore";
-import Point from "./Point";
 
 export default class Graph {
     static computePath(
-        matrix: any[],
+        matrix: number[][],
         startPointIndex: number,
         finishPointIndex: number,
         method: ComputeMethods = ComputeMethods.Dijkstra,
@@ -20,7 +19,7 @@ export default class Graph {
             distances = this.floyd(matrix)
             distance = distances[startPointIndex][finishPointIndex]
         }
-        const paths = this.pathsFromMatrix(matrix)
+        const paths = this.pathsFromMatrix(matrix, method)
         const fullPaths = this.computeFullPaths(paths, startPointIndex)
 
         if (fullPaths[finishPointIndex][0] !== undefined) {
@@ -39,21 +38,17 @@ export default class Graph {
                 const result = this.dijkstraPoint(matrix, i)
                 distances.push(result)
             }
-
             return distances
         }
     }
 
     static floyd(matrix: number[][]) {
-        let matrixCopy = this.copyMatrix(matrix)
-
+        let matrixCopy = this.cloneMatrix(matrix)
         for (let k = 0; k < matrixCopy.length; k++) {
             for (let i = 0; i < matrixCopy.length; i++) {
                 for (let j = 0; j < matrixCopy.length; j++) {
-                    if ((i !== k && matrixCopy[i][k] !== Infinity) || (j !== k && matrixCopy[k][j] !== Infinity)) {
-                        if (matrixCopy[i][j] >= matrixCopy[i][k] + matrixCopy[k][j]) {
-                            matrixCopy[i][j] = matrixCopy[i][k] + matrixCopy[k][j]
-                        }
+                    if (matrixCopy[i][j] > matrixCopy[i][k] + matrixCopy[k][j]) {
+                        matrixCopy[i][j] = matrixCopy[i][k] + matrixCopy[k][j]
                     }
                 }
                 if (matrixCopy[i][i] < 0) {
@@ -61,19 +56,18 @@ export default class Graph {
                 }
             }
         }
-
         return matrixCopy
     }
 
     static dijkstraPoint(matrix: number[][], startPointIndex: number) {
         let i: number | undefined = startPointIndex
-        let viewed = [startPointIndex]
+        let viewed: number[] = [startPointIndex]
         let result = new Array(matrix.length).fill(Infinity)
         result[startPointIndex] = 0
 
         while (i !== undefined) {
             for (let j = 0; j < matrix.length; j++) {
-                if (!viewed.includes(j) && result[i] + matrix[i][j] < result[j]) {
+                if (!viewed.includes(j) && result[j] > result[i] + matrix[i][j]) {
                     result[j] = result[i] + matrix[i][j]
                 }
             }
@@ -96,7 +90,7 @@ export default class Graph {
     }
 
     static adjacencyMatrixValues(): number[][] {
-        const matrixValues = this.copyMatrix(graphStore.adjacencyMatrix)
+        const matrixValues = this.cloneMatrix(graphStore.adjacencyMatrix)
         matrixValues.shift()
         matrixValues.forEach(row => {
             row.shift()
@@ -104,31 +98,32 @@ export default class Graph {
         return matrixValues
     }
 
-    private static copyMatrix(matrix: any[]): any[][] {
-        let matrixCopy = JSON.parse(JSON.stringify(matrix))
-        for (let i = 0; i < matrixCopy.length; i++) {
-            for (let j = 0; j < matrixCopy.length; j++) {
-                if (matrixCopy[i][j] === null) {
-                    matrixCopy[i][j] = Infinity
+    private static cloneMatrix(matrix: any[]): number[][] {
+        const _matrix: number[][] = JSON.parse(JSON.stringify(matrix))
+        for (let i = 0; i < _matrix.length; i++) {
+            for (let j = 0; j < _matrix.length; j++) {
+                if (_matrix[i][j] === null) {
+                    _matrix[i][j] = Infinity
                 }
             }
         }
-        return matrixCopy
+        return _matrix
     }
 
-    static pathsFromMatrix(matrix: number[][]): any[] {
-        let paths = []
+    static pathsFromMatrix(matrix: number[][], method: ComputeMethods = ComputeMethods.Dijkstra): number[][] {
+        const paths: number[][] = this.initMatrixPaths(matrix)
+        // if (method === ComputeMethods.Dijkstra) {
         for (let i = 0; i < matrix.length; i++) {
             let j: number | undefined = i
-            let viewed = [j]
-            let path = new Array(matrix.length).fill(undefined)
+            const viewed = [j]
+            const path = [...new Array(matrix.length).fill(undefined)]
             path[j] = j
-            let result = new Array(matrix.length).fill(Infinity)
+            const result = [...new Array(matrix.length).fill(Infinity)]
             result[j] = 0
 
             while (j !== undefined) {
                 for (let k = 0; k < matrix.length; k++) {
-                    if (!viewed.includes(k) && result[j] + matrix[j][k] < result[k]) {
+                    if (!viewed.includes(k) && result[k] > result[j] + matrix[j][k]) {
                         result[k] = result[j] + matrix[j][k]
                         path[k] = j
                     }
@@ -136,16 +131,42 @@ export default class Graph {
                 j = this.minDistance(result, viewed)
                 if (j !== undefined) viewed.push(j)
             }
-            paths.push(path)
+            paths[i] = path
+        }
+        // todo
+        // } else {
+        //     let matrixCopy = this.cloneMatrix(matrix)
+        //     for (let k = 0; k < matrixCopy.length; k++) {
+        //         for (let i = 0; i < matrixCopy.length; i++) {
+        //             for (let j = 0; j < matrixCopy.length; j++) {
+        //                 if (matrixCopy[i][j] > matrixCopy[i][k] + matrixCopy[k][j]) {
+        //                     matrixCopy[i][j] = matrixCopy[i][k] + matrixCopy[k][j]
+        //                     paths[i][j] = k
+        //                 }
+        //             }
+        //             if (matrixCopy[i][i] < 0) {
+        //                 throw new Error('Нет решения')
+        //             }
+        //         }
+        //     }
+        // }
+        return paths
+    }
+
+    private static initMatrixPaths(matrix: number[][]): number[][] {
+        const {length} = matrix
+        const paths: number[][] = [...new Array(length).fill([])]
+        for (let i = 0; i < length; i++) {
+            paths[i] = [...new Array(length).fill(0)]
         }
         return paths
     }
 
     static computeFullPaths(paths: any[], startPoint?: number): any[] {
-        let allFullPaths = []
+        const allFullPaths = []
 
         for (let i = 0; i < paths.length; i++) {
-            let fullPaths = []
+            const fullPaths = []
             for (let j = 0; j < paths[i].length; j++) {
                 let start = i
                 let finish = j
@@ -182,18 +203,29 @@ export default class Graph {
         return {dijkstra: dijkstraFinish - dijkstraStart, floyd: floydFinish - floydStart}
     }
 
-    static throughPoints(formKey: string, toKey: string, ...points: Point[]) {
-        const matrix = Graph.adjacencyMatrixValues()
-        const paths = Graph.pathsFromMatrix(matrix)
-        const fullPaths = Graph.computeFullPaths(paths)
-        const from = graphStore.findPointByKey(formKey)
-        const to = graphStore.findPointByKey(toKey)
-        fullPaths.map((pathFormPoint: any[], index) => {
-            pathFormPoint.forEach((path: number[]) => {
-                const pointPath = path.map((pointIndex) => graphStore.findPointByIndex(pointIndex))
-                console.log(pointPath.includes(from))
-                console.log(pointPath.includes(to))
-            })
-        })
+    static throughPoints(formKey: string, toKey: string, ...points: string[]): string[][] {
+        const matrix = this.adjacencyMatrixValues()
+        const paths = this.pathsFromMatrix(matrix)
+        const fullPaths: number[][][] = this.computeFullPaths(paths)
+        const fullPointPaths: string[][][] = JSON.parse(JSON.stringify(fullPaths))
+        for (let i = 0; i < fullPaths.length; i++) {
+            for (let j = 0; j < fullPaths[i].length; j++) {
+                fullPointPaths[i][j] = fullPaths[i][j].map(index => graphStore.findPointByIndex(index)?.key as string)
+            }
+        }
+        let throughPointsPaths: string[][] = []
+        let includes = true
+        if (!points.includes(formKey)) points.push(formKey)
+        if (!points.includes(toKey)) points.push(toKey)
+        for (let i = 0; i < fullPointPaths.length; i++) {
+            for (let j = 0; j < fullPointPaths[i].length; j++) {
+                includes = true
+                for (let k = 0; k < points.length; k++) {
+                    if (!fullPointPaths[i][j].includes(points[k])) includes = false
+                }
+                if (includes) throughPointsPaths.push(fullPointPaths[i][j])
+            }
+        }
+        return throughPointsPaths
     }
 }

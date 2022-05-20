@@ -1,4 +1,4 @@
-import React, {Dispatch, FC, Fragment, SetStateAction} from 'react';
+import React, {FC, Fragment} from 'react';
 import {Circle, Line} from "react-konva";
 import graphStore from "../../stores/GraphStore";
 import Connection from "../../classes/Connection";

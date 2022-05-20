@@ -2,6 +2,7 @@ import React, {FC, useRef} from 'react';
 import {Circle} from 'react-konva';
 import Konva from 'konva';
 import KonvaEventObject = Konva.KonvaEventObject;
+import {ConnectionColours} from "../../enums";
 
 interface AnchorProps {
     x: number
@@ -27,7 +28,7 @@ const Anchor: FC<AnchorProps> = ({x, y, dragStartHandler, dragMoveHandler, dragE
         y={y}
         ref={anchor}
         radius={5}
-        fill="#656565"
+        fill={ConnectionColours.BASE}
         draggable
         onDragStart={event => dragStartHandler(event)}
         onDragMove={event => dragMoveHandler(event)}

@@ -7,11 +7,9 @@ import Point from '../classes/Point';
 import Connection from '../classes/Connection';
 import {observer} from 'mobx-react-lite';
 import fileStore from "../stores/FileStore";
-import {MenuItem} from "@mui/material";
-import {ComputeMethods, ConnectionColours} from "../enums";
+import {ComputeMethods} from "../enums";
 import Graph from "../classes/Graph";
 import Painter from "../classes/Painter";
-import Pathfinder from "../classes/Pathfinder";
 
 interface ControlsProps {
     path: number[]
@@ -20,7 +18,7 @@ interface ControlsProps {
     setDistance: Dispatch<SetStateAction<number | undefined>>
 }
 
-const {Option}=Select
+const {Option} = Select
 
 const Controls: FC<ControlsProps> = observer(({
                                                   path,
@@ -35,6 +33,8 @@ const Controls: FC<ControlsProps> = observer(({
     const [selectedFile, setSelectedFile] = useState<string>('')
     const [selectedMethod, setSelectedMethod] = useState<ComputeMethods>(ComputeMethods.Dijkstra)
 
+    const [throughPoints, setThroughPoints] = useState<string[]>([])
+
     useEffect(() => {
         fileStore.getAllFileNames().then()
     }, [])
@@ -42,11 +42,7 @@ const Controls: FC<ControlsProps> = observer(({
     const addPoint = () => {
         const x = Math.round(Math.random() * STAGE_SIZE)
         const y = Math.round(Math.random() * STAGE_SIZE)
-        try {
-            graphStore.addPoint(x, y)
-        } catch (error: any) {
-            message.warn(error.message, 1).then()
-        }
+        graphStore.addPoint(x, y)
     }
 
     const addConnection = () => {
@@ -84,8 +80,8 @@ const Controls: FC<ControlsProps> = observer(({
         try {
             let startIndex = 0, finishIndex = 0
             for (let i = 0; i < graphStore.points.length; i++) {
-                if (graphStore.points[i].key === fromPointKey) startIndex = i
-                if (graphStore.points[i].key === toPointKey) finishIndex = i
+                if (graphStore.findPointByKey(fromPointKey)) startIndex = i
+                if (graphStore.findPointByKey(toPointKey)) finishIndex = i
             }
 
             const [distance, path] = Graph.computePath(matrix, startIndex, finishIndex, selectedMethod)
@@ -93,6 +89,14 @@ const Controls: FC<ControlsProps> = observer(({
             setPath(path)
         } catch (error: any) {
             message.error(error).then()
+        }
+    }
+    const computePathThroughPoints = () => {
+        let throughPointsPaths = Graph.throughPoints(fromPointKey, toPointKey, ...throughPoints)
+        for (let i = 0; i < throughPointsPaths.length; i++) {
+            if (throughPointsPaths[i][0] === fromPointKey && throughPointsPaths[i].at(-1) === toPointKey) {
+                message.success(throughPointsPaths[i].join('->')).then()
+            }
         }
     }
 
@@ -108,7 +112,7 @@ const Controls: FC<ControlsProps> = observer(({
             <div className="space-between">
                 <Select
                     value={fromPointKey}
-                    onChange={event => setFromPointKey(event)}
+                    onChange={value => setFromPointKey(value)}
                     style={{width: 150}}
                 >
                     {graphStore.points.map(point => {
@@ -119,7 +123,7 @@ const Controls: FC<ControlsProps> = observer(({
                 </Select>
                 <Select
                     value={toPointKey}
-                    onChange={event => setToPointKey(event)}
+                    onChange={value => setToPointKey(value)}
                     style={{width: 150}}
                 >
                     {graphStore.points.map(point => {
@@ -133,7 +137,7 @@ const Controls: FC<ControlsProps> = observer(({
                 <Button
                     type="primary"
                     onClick={computePath}
-                    disabled={!fromPointKey || !toPointKey || fromPointKey === toPointKey}
+                    disabled={!!fromPointKey || !!toPointKey}
                     style={{marginTop: 10, marginRight: 10}}
                 >
                     Найти кратчайший путь
@@ -169,6 +173,7 @@ const Controls: FC<ControlsProps> = observer(({
                 style={{width: BUTTON_WIDTH, marginBottom: 10}}
                 value={selectedFile}
                 onChange={value => setSelectedFile(value)}
+                allowClear
             >
                 {fileStore.files.map(file => {
                     return <Option key={file.name} value={file.name}>
@@ -207,10 +212,23 @@ const Controls: FC<ControlsProps> = observer(({
                 </Button>
                 <Button
                     type="primary"
-                    onClick={() => Graph.throughPoints(fromPointKey, toPointKey)}
+                    onClick={computePathThroughPoints}
                 >
                     path through points
                 </Button>
+                <Select
+                    value={throughPoints}
+                    onChange={value => setThroughPoints(value)}
+                    style={{width: 150}}
+                    mode='multiple'
+                    allowClear
+                >
+                    {graphStore.points.map(point => {
+                        return <Option value={point.key} key={point.key}>
+                            {point.getName()}
+                        </Option>
+                    })}
+                </Select>
             </div>
         </div>
         <Radio.Group

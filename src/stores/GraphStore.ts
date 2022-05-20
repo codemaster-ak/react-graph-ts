@@ -53,7 +53,7 @@ class GraphStore {
         if (this.points.length < 10) {
             const newPoint = new Point(x, y)
             this.points.push(newPoint)
-        } else throw new Error('Достигнуто максимальное количество вершин - 10')
+        }
     }
 
     @action
@@ -85,7 +85,7 @@ class GraphStore {
 
     @action
     changeConnectionWeight(key: string, weight: number): void {
-        if (weight > 0 && weight < 100){
+        if (weight > 0 && weight < 100) {
             for (let i = 0; i < this.connections.length; i++) {
                 if (this.connections[i].key === key) {
                     const {from, to, colour, key} = this.connections[i]
@@ -181,11 +181,16 @@ class GraphStore {
         }
         for (let i = 1; i < matrix.length; i++) {
             for (let j = 1; j <= matrix.length - 1; j++) {
-                const connection = this.findConnectionByPoints(matrix[0][j], matrix[i][0])
+                let connection = this.findConnectionByPoints(matrix[0][j], matrix[i][0])
+                if (!connection) connection = this.findConnectionByPoints(matrix[i][0], matrix[0][j])
                 if (connection) {
                     matrix[i][j] = connection.weight
                     matrix[j][i] = connection.weight
-                } else matrix[i][j] = Infinity
+                } else {
+                    matrix[i][j] = Infinity
+                    matrix[j][i] = Infinity
+                }
+                if (i === j) matrix[i][j] = 0
             }
         }
         return matrix as AdjacencyMatrixI

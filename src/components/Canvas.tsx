@@ -17,6 +17,7 @@ import {runInAction} from 'mobx';
 import Transition from "./canvas-components/Transition";
 import Package from "./canvas-components/Package";
 import KonvaEventObject = Konva.KonvaEventObject;
+import {ConnectionColours} from "../enums";
 
 const Canvas: FC = observer(() => {
 
@@ -34,11 +35,7 @@ const Canvas: FC = observer(() => {
         if (event.target === stage) {
             event.evt.preventDefault()
             const mousePos = CanvasHandler.getMousePos(event)
-            try {
-                graphStore.addPoint(mousePos.x, mousePos.y)
-            } catch (error: any) {
-                message.warn(error.message, 1).then()
-            }
+            graphStore.addPoint(mousePos.x, mousePos.y)
         }
     }
 
@@ -54,8 +51,8 @@ const Canvas: FC = observer(() => {
                 x={position.x}
                 y={position.y}
                 points={CanvasHandler.createConnectionPoints(position, position)}
-                stroke="black"
-                strokeWidth={2}
+                stroke={ConnectionColours.BASE}
+                strokeWidth={3}
             />,
         )
     }
@@ -68,7 +65,7 @@ const Canvas: FC = observer(() => {
                 x={position.x}
                 y={position.y}
                 points={CanvasHandler.createConnectionPoints({x: 0, y: 0}, mousePos)}
-                stroke="#656565"
+                stroke={ConnectionColours.BASE}
                 strokeWidth={3}
             />,
         )

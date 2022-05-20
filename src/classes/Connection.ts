@@ -1,7 +1,6 @@
 import Point from './Point';
 import {ConnectionColours} from "../enums";
 import {ShapeI} from "../interfaces";
-import Konva from "konva";
 
 export default class Connection implements ShapeI {
     from: Point
@@ -29,7 +28,7 @@ export default class Connection implements ShapeI {
         return from.key.substring(from.key.length - 2) + '-' + to.key.substring(to.key.length - 2)
     }
 
-    getPointsCoords(): number[] {
+    getPointsCoords(): number[] {//todo??
         const {from, to} = this
         return [from.x, from.y, to.x, to.y]
     }

@@ -35,7 +35,7 @@ class FileStore {
     async remove(name: string): Promise<void> {
         axios.delete(Urls.deleteFile + name).then(response => {
             if (response.status === 200) {
-                const file = this.files.find(file => file.name === name)!
+                const file = this.files.find(file => file.name === name) as FileI
                 const index = this.files.indexOf(file)
                 this.files.splice(index, 1)
             }

@@ -31,9 +31,10 @@ const Header: FC<HeaderProps> = ({
 
         const distances = Graph.dijkstra(matrix)
         const paths = Graph.pathsFromMatrix(matrix)
+
         const fullPaths = Graph.computeFullPaths(paths)
 
-        let tablePaths = []
+        const tablePaths = []
         for (let i = 0; i < fullPaths.length; i++) {
             for (let j = 0; j < fullPaths[i].length; j++) {
                 if (fullPaths[i][j].length > 1) {
@@ -52,7 +53,6 @@ const Header: FC<HeaderProps> = ({
                 }
             }
         }
-
         setPathList(tablePaths)
     }
 
