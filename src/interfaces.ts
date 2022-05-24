@@ -14,7 +14,7 @@ export interface FileI {
 }
 
 export type IncidenceMatrixCell = Point | Connection | number | string | object
-export type AdjacencyMatrixCell = Point | number | object
+export type AdjacencyMatrixCell = Point | number | null
 
 export interface IncidenceMatrixRowI extends Array<IncidenceMatrixCell> {
 }

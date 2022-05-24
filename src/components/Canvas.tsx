@@ -5,7 +5,6 @@ import {STAGE_SIZE} from '../consts';
 import Point from '../classes/Point';
 import Konva from 'konva';
 import Points from './canvas-components/Points';
-import {message} from 'antd';
 import {observer} from 'mobx-react-lite';
 import graphStore from '../stores/GraphStore';
 import Connections from './canvas-components/Connections';
@@ -14,20 +13,34 @@ import ConnectionPreview from './canvas-components/ConnectionPreview';
 import PointTitles from './canvas-components/PointTitles';
 import CanvasHandler from '../classes/CanvasHandler';
 import {runInAction} from 'mobx';
-import Transition from "./canvas-components/Transition";
+import {ConnectionColours} from "../enums";
+import Connection from "../classes/Connection";
 import Package from "./canvas-components/Package";
 import KonvaEventObject = Konva.KonvaEventObject;
-import {ConnectionColours} from "../enums";
+import canvasStore from "../stores/CanvasStore";
 
 const Canvas: FC = observer(() => {
 
     const stageRef = useRef<Konva.Stage>(null)
 
     const [connectionPreview, setConnectionPreview] = useState<ReactElement<ReactNode> | null>(null)
+    const [hovered, setHovered] = useState<boolean>(false)
+    const [hoveredConnection, setHoveredConnection] = useState<Connection | null>(null)
 
     const onClickStageHandler = (event: KonvaEventObject<PointerEvent>): void => {
         if (event.target === stageRef.current) {
-            runInAction(() => graphStore.selectedPoint = null)
+            runInAction(() => canvasStore.selectedPoint = null)
+        }
+    }
+
+    const onMouseMoveStageHandler = (event: KonvaEventObject<any>): void => {
+        const connection = CanvasHandler.detectHoverWeightCircle(event)
+        if (connection) {
+            setHovered(true)
+            setHoveredConnection(connection)
+        } else {
+            setHovered(false)
+            setHoveredConnection(null)
         }
     }
 
@@ -75,7 +88,7 @@ const Canvas: FC = observer(() => {
         setConnectionPreview(null)
         const stage = event.target.getStage()!
         const mousePos = stage.getPointerPosition()!
-        const {selectedPoint} = graphStore
+        const {selectedPoint} = canvasStore
         if (selectedPoint) addConnection(mousePos, selectedPoint)
     }
 
@@ -84,13 +97,13 @@ const Canvas: FC = observer(() => {
         height={STAGE_SIZE}
         ref={stageRef}
         onClick={onClickStageHandler}
-        onDblClick={(event) => addPoint(event, stageRef.current)}
+        onMouseMove={onMouseMoveStageHandler}
+        onDblClick={event => addPoint(event, stageRef.current)}
     >
         <Layer>
             {/** порядок Border и Points не менять */}
             <Connections/>
-            {/**<Transition/> тут должно быть*/}
-            <ConnectionWeights/>
+            <ConnectionWeights hovered={hovered} hoveredConnection={hoveredConnection}/>
             <ConnectionPreview line={connectionPreview}/>
             <Border
                 onAnchorDragMove={anchorDragMoveHandler}
@@ -99,7 +112,6 @@ const Canvas: FC = observer(() => {
             />
             <Points/>
             <PointTitles/>
-            <Transition/>
             <Package/>
         </Layer>
     </Stage>

@@ -1,23 +1,23 @@
-import {action, computed, makeObservable, observable} from 'mobx';
+import {action, computed, IObservableArray, makeObservable, observable, set} from 'mobx';
 import Point from '../classes/Point';
 import Connection from '../classes/Connection';
 import {ConnectionColours, PointColours} from "../enums";
 import {AdjacencyMatrixI, IncidenceMatrixI} from "../interfaces";
+import canvasStore from "./CanvasStore";
 
 class GraphStore {
-    @observable selectedPoint: Point | null = null
-    @observable points = observable.array<Point>([])
-    @observable connections = observable.array<Connection>([])
-
-    @observable transitionLine: Connection | null = null//todo ??
+    @observable points: IObservableArray<Point>
+    @observable connections: IObservableArray<Connection>
 
     constructor() {
         makeObservable(this)
+        this.points = observable.array<Point>([])
+        this.connections = observable.array<Connection>([])
     }
 
     @action
     parseFromIncidenceMatrix(matrix: any[][]): void {
-        graphStore.selectedPoint = null
+        canvasStore.selectedPoint = null
         const points: Point[] = []
         for (let i = 0; i < matrix.length; i++) {
             if (i === 0) {
@@ -65,12 +65,6 @@ class GraphStore {
     }
 
     @action
-    selectPoint(key: string): void {
-        if (this.selectedPoint?.key === key) this.selectedPoint = null
-        else this.selectedPoint = this.points.find(point => point.key === key)!
-    }
-
-    @action
     updatePointCoords(key: string, x: number, y: number): void {
         for (let i = 0; i < this.points.length; i++) {
             if (this.points[i].key === key) {
@@ -78,7 +72,7 @@ class GraphStore {
                 // this.points[i].x = x
                 // this.points[i].y = y
                 this.updateConnections(this.points[i])
-                if (this.selectedPoint) this.selectedPoint = this.points[i]//todo ??
+                if (canvasStore.selectedPoint) canvasStore.selectedPoint = this.points[i]//todo ??
             }
         }
     }
@@ -96,7 +90,7 @@ class GraphStore {
     }
 
     @action
-    updateConnections(point: Point): void { // todo доработать ??
+    private updateConnections(point: Point): void { // todo доработать ??
         for (let i = 0; i < this.connections.length; i++) {
             if (this.connections[i].from.key === point.key) {
                 const {from, to, colour, key, weight} = this.connections[i]
@@ -136,20 +130,22 @@ class GraphStore {
     }
 
     @action
-    deletePoint(key: string): void {
-        const point = this.findPointByKey(key)!
-        const index = this.points.indexOf(point)
-        this.points.splice(index, 1)
-        const connections = this.findConnectionsByPointKey(key)
-        connections.forEach(connection => this.deleteConnection(connection.key))
-        if (this.selectedPoint?.key === key) this.selectedPoint = null
+    deletePoint(point: Point): void {
+        this.points.remove(point)
+        const connections = this.findConnectionsByPointKey(point.key)
+        connections.forEach(connection => this.deleteConnection(connection))
+        if (canvasStore.selectedPoint?.key === point.key) canvasStore.selectedPoint = null
     }
 
     @action
-    deleteConnection(key: string): void {
-        const connection = this.connections.find(connection => connection.key === key)!
-        const index = this.connections.indexOf(connection)
-        this.connections.splice(index, 1)
+    deleteConnection(connection: Connection): void {
+        this.connections.remove(connection)
+    }
+
+    @action
+    clearAll(): void {
+        graphStore.points.clear()
+        graphStore.connections.clear()
     }
 
     /** Матрица инцидентности */
@@ -162,9 +158,8 @@ class GraphStore {
                 if (rows[j][0].key === from.key || rows[j][0].key === to.key) {
                     rows[j].push(this.connections[i].weight)
                 } else {
-                    if (j === 0) {
-                        rows[j].push(this.connections[i])
-                    } else rows[j].push(0)
+                    if (j === 0) rows[j].push(this.connections[i])
+                    else rows[j].push(0)
                 }
             }
         }
@@ -174,15 +169,15 @@ class GraphStore {
     /** Матрица смежности */
     @computed
     get adjacencyMatrix(): AdjacencyMatrixI {
-        const matrix: any[][] = [[null]]
+        const matrix: AdjacencyMatrixI = [[null]]
         for (let i = 0; i < this.points.length; i++) {
             matrix[0].push(this.points[i])
             matrix.push([this.points[i], ...new Array(this.points.length).fill(0)])
         }
         for (let i = 1; i < matrix.length; i++) {
             for (let j = 1; j <= matrix.length - 1; j++) {
-                let connection = this.findConnectionByPoints(matrix[0][j], matrix[i][0])
-                if (!connection) connection = this.findConnectionByPoints(matrix[i][0], matrix[0][j])
+                let connection = this.findConnectionByPoints(matrix[0][j] as Point, matrix[i][0] as Point)
+                if (!connection) connection = this.findConnectionByPoints(matrix[i][0] as Point, matrix[0][j] as Point)
                 if (connection) {
                     matrix[i][j] = connection.weight
                     matrix[j][i] = connection.weight
@@ -193,15 +188,35 @@ class GraphStore {
                 if (i === j) matrix[i][j] = 0
             }
         }
-        return matrix as AdjacencyMatrixI
+        return matrix
     }
 
     findPointByIndex(index: number): Point | undefined {
         return this.points.find((_, i) => i === index)
     }
 
+    findIndexByPoint(point: Point): number | undefined {
+        let index: number | undefined = undefined
+        for (let i = 0; i < this.points.length; i++) {
+            if (this.points[i].key === point.key) {
+                index = i
+            }
+        }
+        return index
+    }
+
     findPointByKey(key: string): Point | undefined {
         return this.points.find(point => point.key === key)
+    }
+
+    findConnectionByKey(key: string): Connection | undefined {
+        return this.connections.find(connection => connection.key === key)
+    }
+
+    findConnectionsByFromPointKey(key: string): Connection[] {
+        return this.connections.filter(connection => {
+            return connection.from.key === key
+        })
     }
 
     findConnectionsByPointKey(key: string): Connection[] {

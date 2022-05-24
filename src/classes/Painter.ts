@@ -3,6 +3,7 @@ import graphStore from "../stores/GraphStore";
 import Connection from "./Connection";
 import {ConnectionColours, PointColours} from "../enums";
 import {runInAction} from "mobx";
+import canvasStore from "../stores/CanvasStore";
 
 export default class Painter {
     static getPointsToHighlight(path: number[]): Point[] {
@@ -48,11 +49,11 @@ export default class Painter {
                 if (connection || reversedConnection) {
                     setTimeout(() => {
                         if (connection) {
-                            runInAction(() => graphStore.transitionLine = connection || null) // todo
+                            runInAction(() => canvasStore.transitionLine = connection || null) // todo
                         }
                         if (reversedConnection) {
                             connection = new Connection(points[i], points[i + 1])
-                            runInAction(() => graphStore.transitionLine = connection || null) // todo
+                            runInAction(() => canvasStore.transitionLine = connection || null) // todo
                         }
                         graphStore.changePointsColour([points[i]], PointColours.HIGHLIGHTED)
                     }, time * count)
@@ -60,7 +61,7 @@ export default class Painter {
                     if (reversedConnection) count += reversedConnection.weight
                     setTimeout(() => {
                         if (connection || reversedConnection) {
-                            runInAction(() => graphStore.transitionLine = null)//todo
+                            runInAction(() => canvasStore.transitionLine = null)//todo
                             if (connection) {
                                 graphStore.changeConnectionsColour([connection], ConnectionColours.HIGHLIGHTED)
                             }

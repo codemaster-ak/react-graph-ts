@@ -3,16 +3,37 @@ import './App.scss';
 import Header from './components/Header';
 import Main from './components/Main';
 import Footer from './components/Footer';
+import {ComputeMethods} from "./enums";
 
 const App: FC = () => {
 
-    const [path, setPath] = useState<number[]>([])
-    const [distance, setDistance] = useState<number | undefined>(undefined)
+    const [fromPointKey, setFromPointKey] = useState<string>('')
+    const [toPointKey, setToPointKey] = useState<string>('')
+    const [compareResult, setCompareResult] = useState<string>('')
+
+    const [throughPoints, setThroughPoints] = useState<string[]>([])
+    const [selectedMethod, setSelectedMethod] = useState<ComputeMethods>(ComputeMethods.Dijkstra)
 
     return <div className="full-height app">
-        <Header path={path} setPath={setPath} distance={distance} setDistance={setDistance}/>
+        <Header
+            fromPointKey={fromPointKey}
+            toPointKey={toPointKey}
+            compareResult={compareResult}
+            selectedMethod={selectedMethod}
+            throughPoints={throughPoints}
+        />
         <Main/>
-        <Footer/>
+        <Footer
+            fromPointKey={fromPointKey}
+            toPointKey={toPointKey}
+            setFromPointKey={setFromPointKey}
+            setToPointKey={setToPointKey}
+            setCompareResult={setCompareResult}
+            throughPoints={throughPoints}
+            setThroughPoints={setThroughPoints}
+            selectedMethod={selectedMethod}
+            setSelectedMethod={setSelectedMethod}
+        />
     </div>
 
 }

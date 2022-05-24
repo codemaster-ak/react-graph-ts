@@ -1,7 +1,7 @@
 @import '~antd/dist/antd.css';
 
 $rounded-radius: 4px;
-$matrix-stage-size: 550px;
+$matrix-stage-size: 600px;
 $spacing-md: 16px;
 $white: "#fff";
 
@@ -93,6 +93,26 @@ $white: "#fff";
   flex-direction: column;
 }
 
+.row-flex-center {
+  @extend .flex-container;
+  justify-content: center;
+}
+
+.col-flex-center {
+  @extend .flex-container;
+  align-items: center;
+}
+
+.flex-center {
+  @extend .row-flex-center;
+  @extend .col-flex-center;
+}
+
+.flex-center-column {
+  @extend .flex-center;
+  @extend .flex-column;
+}
+
 .grid-container {
   display: grid;
 }
@@ -111,7 +131,7 @@ $white: "#fff";
 
 .app {
   @extend .grid-container;
-  grid-template-rows: 1fr 600px 1fr;
+  grid-template-rows: 1fr calc(#{$matrix-stage-size} + 50px) 1fr;
 }
 
 .main {
@@ -133,14 +153,10 @@ $white: "#fff";
 .matrix {
   @extend .flex-column;
   flex-wrap: wrap;
-  //grid-template-rows: repeat(auto-fill, 42px);
 }
 
 .matrix-row {
   @extend .flex-container;
-  //width: 60px;
-  //border: 1px solid #000000;
-  //text-align: center;
 }
 
 .matrix-cell {
@@ -154,10 +170,4 @@ $white: "#fff";
   @extend .rounded;
   @extend .white-bg;
   @extend .shadow;
-}
-
-.canvas-menu {
-  @extend .rounded;
-  @extend .white-bg;
-  position: absolute;
 }

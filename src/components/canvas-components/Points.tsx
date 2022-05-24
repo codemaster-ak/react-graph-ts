@@ -5,6 +5,7 @@ import {observer} from 'mobx-react-lite';
 import graphStore from '../../stores/GraphStore';
 import Konva from 'konva';
 import KonvaEventObject = Konva.KonvaEventObject;
+import canvasStore from "../../stores/CanvasStore";
 
 const Points: FC = observer(() => {
 
@@ -22,8 +23,8 @@ const Points: FC = observer(() => {
                 y={y}
                 radius={radius}
                 fill={colour}
-                onClick={() => graphStore.selectPoint(key)}
-                onDblClick={() => graphStore.deletePoint(key)}
+                onClick={() => canvasStore.selectPoint(key)}
+                onDblClick={() => graphStore.deletePoint(point)}
                 onDragMove={(event) => pointDragHandler(event, key)}
                 draggable
                 perfectDrawEnabled

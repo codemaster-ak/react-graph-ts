@@ -1,5 +1,7 @@
 import {ComputeMethods} from '../enums';
 import graphStore from "../stores/GraphStore";
+import Point from "./Point";
+import {PathI} from "../stores/PathfinderStore";
 
 export default class Graph {
     static computePath(
@@ -203,7 +205,7 @@ export default class Graph {
         return {dijkstra: dijkstraFinish - dijkstraStart, floyd: floydFinish - floydStart}
     }
 
-    static throughPoints(formKey: string, toKey: string, ...points: string[]): string[][] {
+    static throughPoints(fromKey: string, toKey: string, ...points: string[]): string[][] {
         const matrix = this.adjacencyMatrixValues()
         const paths = this.pathsFromMatrix(matrix)
         const fullPaths: number[][][] = this.computeFullPaths(paths)
@@ -215,17 +217,39 @@ export default class Graph {
         }
         let throughPointsPaths: string[][] = []
         let includes = true
-        if (!points.includes(formKey)) points.push(formKey)
+        if (!points.includes(fromKey)) points.push(fromKey)
         if (!points.includes(toKey)) points.push(toKey)
         for (let i = 0; i < fullPointPaths.length; i++) {
-            for (let j = 0; j < fullPointPaths[i].length; j++) {
-                includes = true
-                for (let k = 0; k < points.length; k++) {
-                    if (!fullPointPaths[i][j].includes(points[k])) includes = false
+            if (fullPointPaths[i][0][0] === fromKey) {
+                for (let j = 0; j < fullPointPaths[i].length; j++) {
+                    if (fullPointPaths[i][j].at(-1) === toKey) {
+                        // console.log(fullPointPaths[i][j])
+                    }
+                    includes = true
+                    for (let k = 0; k < points.length; k++) {
+                        if (!fullPointPaths[i][j].includes(points[k])) includes = false
+                    }
+                    if (includes) throughPointsPaths.push(fullPointPaths[i][j])
                 }
-                if (includes) throughPointsPaths.push(fullPointPaths[i][j])
             }
         }
         return throughPointsPaths
+    }
+
+    static allPath(fromKey: string, toKey: string): any {
+        const paths: PathI[] = []
+        const start = graphStore.findPointByKey(fromKey) as Point
+        paths.push([start])
+        console.log(paths)
+        const connections = graphStore.findConnectionsByPointKey(fromKey)
+        for (let i = 0; i < connections.length; i++) {
+
+            if (paths[0].map(p => p.key).includes(connections[i].from.key)) {
+                console.log('to', connections[i].to)
+            }
+            if (paths[0].map(p => p.key).includes(connections[i].to.key)) {
+                console.log('from', connections[i].from)
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import Konva from 'konva';
 import {observer} from 'mobx-react-lite';
 import graphStore from '../../stores/GraphStore';
 import KonvaEventObject = Konva.KonvaEventObject;
+import canvasStore from "../../stores/CanvasStore";
 
 interface BorderProps {
     onAnchorDragStart: (event: KonvaEventObject<DragEvent>) => void
@@ -18,7 +19,7 @@ const Border: FC<BorderProps> = observer(({
                                               onAnchorDragEnd,
                                           }) => {
 
-    const {selectedPoint} = graphStore
+    const {selectedPoint} = canvasStore
 
     const [anchorPoints, setAnchorPoints] = useState<Konva.Vector2d[]>([])
 

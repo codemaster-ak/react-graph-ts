@@ -4,6 +4,7 @@ import {observer} from 'mobx-react-lite';
 import {Text} from 'react-konva';
 import Konva from 'konva';
 import KonvaEventObject = Konva.KonvaEventObject;
+import canvasStore from "../../stores/CanvasStore";
 
 const PointTitles: FC = observer(() => {
 
@@ -22,8 +23,8 @@ const PointTitles: FC = observer(() => {
                 fontSize={16}
                 text={point.getName()}
                 fill="white"
-                onClick={() => graphStore.selectPoint(key)}
-                onDblClick={() => graphStore.deletePoint(key)}
+                onClick={() => canvasStore.selectPoint(key)}
+                onDblClick={() => graphStore.deletePoint(point)}
                 onDragMove={(event) => pointDragHandler(event, key)}
                 draggable
                 perfectDrawEnabled={false}

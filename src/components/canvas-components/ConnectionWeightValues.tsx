@@ -9,7 +9,7 @@ const ConnectionWeightValues: FC = observer(() => {
     return <Fragment>
         {graphStore.connections.map(connection => {
             const {from, to, weight, key} = connection
-            const {x, y} = CanvasHandler.getConnectionCoords(from, to)
+            const {x, y} = CanvasHandler.getConnectionWeightCoords(from, to)
             if (x && y) {
                 return <Text
                     key={key}

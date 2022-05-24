@@ -4,10 +4,11 @@ import Konva from "konva";
 import useImage from "../../hooks/useImage";
 import graphStore from "../../stores/GraphStore";
 import {observer} from "mobx-react-lite";
+import canvasStore from "../../stores/CanvasStore";
 
 const Package = observer(() => {
 
-    const {transitionLine} = graphStore
+    const {transitionLine} = canvasStore
 
     const imageRef = useRef<Konva.Image>(null)
     const image = useImage('./file.png')
@@ -32,7 +33,6 @@ const Package = observer(() => {
             image={image}
             x={transitionLine?.from.x}
             y={transitionLine?.from.y}
-            draggable
         />
         : null
 })

@@ -19,8 +19,7 @@ const MatrixCell: FC<MatrixCellProps> = observer(({
                                                   }) => {
 
     const getCellText = (cell: IncidenceMatrixCell): string => {
-        if (cell instanceof Connection) return cell.getName()
-        else if (cell instanceof Point) return cell.getName()
+        if (cell instanceof Connection || cell instanceof Point) return cell.getName()
         else return ''
     }
 
