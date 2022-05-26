@@ -1,12 +1,12 @@
 import React, {Dispatch, FC, SetStateAction, useEffect, useState} from 'react';
 import {Button, Radio, Select} from "antd";
 import graphStore from "../stores/GraphStore";
-import {BUTTON_WIDTH, STAGE_SIZE} from "../consts";
 import Graph from "../classes/Graph";
 import {ComputeMethods} from "../enums";
 import ResultTableModal from "./ResultTableModal";
 import fileStore from "../stores/FileStore";
 import {observer} from "mobx-react-lite";
+import CanvasHandler from "../classes/CanvasHandler";
 
 const {Option} = Select
 
@@ -43,8 +43,8 @@ const Footer: FC<FooterProps> = observer(({
     const [selectedFile, setSelectedFile] = useState<string>('')
 
     const addPoint = () => {
-        const x = Math.round(Math.random() * STAGE_SIZE)
-        const y = Math.round(Math.random() * STAGE_SIZE)
+        const x = Math.round(Math.random() * CanvasHandler.STAGE_SIZE)
+        const y = Math.round(Math.random() * CanvasHandler.STAGE_SIZE)
         graphStore.addPoint(x, y)
     }
 
@@ -96,6 +96,7 @@ const Footer: FC<FooterProps> = observer(({
     }
 
     const createFile = () => {
+        graphStore.removeConnectionsFromPoints()
         fileStore.save(graphStore.incidenceMatrix).then()
     }
 
@@ -178,10 +179,7 @@ const Footer: FC<FooterProps> = observer(({
                 <div className='flex-column'>
                     <Button
                         type="primary"
-                        onClick={() => {
-                            showResult()
-                            // Graph.allPath(fromPointKey, toPointKey)
-                        }}
+                        onClick={showResult}
                     >
                         Вывести таблицу
                     </Button>
@@ -200,13 +198,13 @@ const Footer: FC<FooterProps> = observer(({
                 >
                     <Radio.Button
                         value={ComputeMethods.Dijkstra}
-                        style={{width: BUTTON_WIDTH / 2 - 2, textAlign: "center"}}
+                        style={{textAlign: "center"}}
                     >
                         Дейкстра
                     </Radio.Button>
                     <Radio.Button
                         value={ComputeMethods.Floyd}
-                        style={{width: BUTTON_WIDTH / 2 - 2, textAlign: "center"}}
+                        style={{textAlign: "center"}}
                     >
                         Флойд
                     </Radio.Button>

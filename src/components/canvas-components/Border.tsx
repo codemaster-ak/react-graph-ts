@@ -3,9 +3,8 @@ import {Circle} from 'react-konva';
 import Anchor from './Anchor';
 import Konva from 'konva';
 import {observer} from 'mobx-react-lite';
-import graphStore from '../../stores/GraphStore';
-import KonvaEventObject = Konva.KonvaEventObject;
 import canvasStore from "../../stores/CanvasStore";
+import KonvaEventObject = Konva.KonvaEventObject;
 
 interface BorderProps {
     onAnchorDragStart: (event: KonvaEventObject<DragEvent>) => void

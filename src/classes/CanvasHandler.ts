@@ -5,6 +5,8 @@ import Connection from "./Connection";
 import KonvaEventObject = Konva.KonvaEventObject;
 
 export default class CanvasHandler {
+    static STAGE_SIZE = 600
+
     static createConnectionPoints(source: Konva.Vector2d, destination: Konva.Vector2d): number[] {
         return [source.x, source.y, destination.x, destination.y]
     }
@@ -45,7 +47,6 @@ export default class CanvasHandler {
             return point.key !== from.key && this.hasIntersection(position, point)
         })
     }
-
 
     static detectHoverWeightCircle(event: KonvaEventObject<any>): Connection | undefined {
         for (let i = 0; i < graphStore.connections.length; i++) {

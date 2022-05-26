@@ -1,4 +1,4 @@
-import {action, computed, IObservableArray, makeObservable, observable, set} from 'mobx';
+import {action, computed, IObservableArray, makeObservable, observable} from 'mobx';
 import Point from '../classes/Point';
 import Connection from '../classes/Connection';
 import {ConnectionColours, PointColours} from "../enums";
@@ -40,12 +40,14 @@ class GraphStore {
                     matrix[i][0].x,
                     matrix[i][0].y,
                     matrix[i][0].colour,
+                    [],
                     matrix[i][0].key
                 )
                 points.push(newPoint)
             }
         }
         graphStore.points = observable.array<Point>(points)
+        this.addConnectionsToPoints()
     }
 
     @action
@@ -60,15 +62,29 @@ class GraphStore {
     addConnection(from: Point, to: Point): void {
         if (!this.checkConnectionExist(from, to)) {
             const newConnection = new Connection(from, to)
+            from.connections.push(newConnection)
+            to.connections.push(newConnection)
             this.connections.push(newConnection)
         }
+    }
+
+    @action
+    addConnectionsToPoints(): void {//todo??
+        for (let i = 0; i < this.connections.length; i++) {
+            let {from, to} = this.connections[i]
+            from = this.findPointByKey(from.key) as Point
+            to = this.findPointByKey(to.key) as Point
+            from.connections.push(this.connections[i])
+            to.connections.push(this.connections[i])
+        }
+        // console.log(this.points)
     }
 
     @action
     updatePointCoords(key: string, x: number, y: number): void {
         for (let i = 0; i < this.points.length; i++) {
             if (this.points[i].key === key) {
-                this.points[i] = new Point(x, y, this.points[i].colour, key)
+                this.points[i] = new Point(x, y, this.points[i].colour, this.points[i].connections, key)
                 // this.points[i].x = x
                 // this.points[i].y = y
                 this.updateConnections(this.points[i])
@@ -112,8 +128,8 @@ class GraphStore {
         const keys = points.map(point => point.key)
         for (let i = 0; i < this.points.length; i++) {
             if (keys.includes(this.points[i].key)) {
-                const {x, y, key} = this.points[i]
-                this.points[i] = new Point(x, y, colour, key)
+                const {x, y, connections, key} = this.points[i]
+                this.points[i] = new Point(x, y, colour, connections, key)
             }
         }
     }
@@ -143,6 +159,13 @@ class GraphStore {
     }
 
     @action
+    removeConnectionsFromPoints(): void {
+        for (let i = 0; i < this.points.length; i++) {
+            this.points[i].removeConnections()
+        }
+    }
+
+    @action
     clearAll(): void {
         graphStore.points.clear()
         graphStore.connections.clear()
@@ -151,19 +174,19 @@ class GraphStore {
     /** Матрица инцидентности */
     @computed
     get incidenceMatrix(): IncidenceMatrixI {
-        const rows: any[][] = [[{name: ''}], ...this.points.map(point => [point])]
+        const matrix: any[][] = [[null], ...this.points.map(point => [point])]
         for (let i = 0; i < this.connections.length; i++) {
             const {from, to} = this.connections[i]
-            for (let j = 0; j < rows.length; j++) {
-                if (rows[j][0].key === from.key || rows[j][0].key === to.key) {
-                    rows[j].push(this.connections[i].weight)
+            for (let j = 0; j < matrix.length; j++) {
+                if (matrix[j][0]?.key === from.key || matrix[j][0]?.key === to.key) {
+                    matrix[j].push(this.connections[i].weight)
                 } else {
-                    if (j === 0) rows[j].push(this.connections[i])
-                    else rows[j].push(0)
+                    if (j === 0) matrix[j].push(this.connections[i])
+                    else matrix[j].push(0)
                 }
             }
         }
-        return rows as IncidenceMatrixI
+        return matrix as IncidenceMatrixI
     }
 
     /** Матрица смежности */
@@ -191,10 +214,6 @@ class GraphStore {
         return matrix
     }
 
-    findPointByIndex(index: number): Point | undefined {
-        return this.points.find((_, i) => i === index)
-    }
-
     findIndexByPoint(point: Point): number | undefined {
         let index: number | undefined = undefined
         for (let i = 0; i < this.points.length; i++) {
@@ -207,16 +226,6 @@ class GraphStore {
 
     findPointByKey(key: string): Point | undefined {
         return this.points.find(point => point.key === key)
-    }
-
-    findConnectionByKey(key: string): Connection | undefined {
-        return this.connections.find(connection => connection.key === key)
-    }
-
-    findConnectionsByFromPointKey(key: string): Connection[] {
-        return this.connections.filter(connection => {
-            return connection.from.key === key
-        })
     }
 
     findConnectionsByPointKey(key: string): Connection[] {

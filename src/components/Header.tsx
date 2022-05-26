@@ -4,7 +4,7 @@ import Graph from "../classes/Graph";
 import {ComputeMethods, ConnectionColours, PointColours} from "../enums";
 import Painter from "../classes/Painter";
 import graphStore from "../stores/GraphStore";
-import pathfinderStore from "../stores/PathfinderStore";
+import Pathfinder from "../classes/Pathfinder";
 import {observer} from "mobx-react-lite";
 
 interface HeaderProps {
@@ -55,21 +55,31 @@ const Header: FC<HeaderProps> = observer(({
             const [distance, path] = Graph.computePath(matrix, startIndex, finishIndex, selectedMethod)
             setDistance(distance)
             setPath(path)
-            pathfinderStore.makePaths(path)
         } catch (error: any) {
             message.error(error).then()
         }
     }
 
     const computePathThroughPoints = () => {
-        console.log(fromPointKey, toPointKey, throughPoints)
-        const throughPointsPaths = Graph.throughPoints(fromPointKey, toPointKey, ...throughPoints)
-        // console.log(throughPointsPaths)
-        for (let i = 0; i < throughPointsPaths.length; i++) {
-            if (throughPointsPaths[i][0] === fromPointKey && throughPointsPaths[i].at(-1) === toPointKey) {
-                message.success(throughPointsPaths[i].map(point => point.substring(point.length - 2)).join(' -> ')).then()
+        const fromToPathKeys: string[][] = []
+        const pathfinder = new Pathfinder()
+        const allPaths = pathfinder.allPaths(graphStore.points)
+        for (let i = 0; i < allPaths.length; i++) {
+            for (let j = 0; j < allPaths[i].length; j++) {
+                if (allPaths[i][j][0].key === fromPointKey && allPaths[i][j].at(-1)?.key === toPointKey) {
+                    fromToPathKeys.push(allPaths[i][j].map(point => point.key))
+                }
             }
         }
+        const pathThroughPoints: string[][] = []
+        for (let i = 0; i < fromToPathKeys.length; i++) {
+            let includes = true
+            for (let j = 0; j < throughPoints.length; j++) {
+                if (!fromToPathKeys[i].includes(throughPoints[j])) includes = false
+            }
+            if (includes) pathThroughPoints.push(fromToPathKeys[i])
+        }
+        console.log(pathThroughPoints)
     }
 
     const getPathValue = (path: number[]) => {

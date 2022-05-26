@@ -1,7 +1,6 @@
 import React, {FC, ReactElement, ReactNode, useRef, useState} from 'react';
 import {Layer, Line, Stage} from 'react-konva';
 import Border from './canvas-components/Border';
-import {STAGE_SIZE} from '../consts';
 import Point from '../classes/Point';
 import Konva from 'konva';
 import Points from './canvas-components/Points';
@@ -16,8 +15,8 @@ import {runInAction} from 'mobx';
 import {ConnectionColours} from "../enums";
 import Connection from "../classes/Connection";
 import Package from "./canvas-components/Package";
-import KonvaEventObject = Konva.KonvaEventObject;
 import canvasStore from "../stores/CanvasStore";
+import KonvaEventObject = Konva.KonvaEventObject;
 
 const Canvas: FC = observer(() => {
 
@@ -93,8 +92,8 @@ const Canvas: FC = observer(() => {
     }
 
     return <Stage
-        width={STAGE_SIZE}
-        height={STAGE_SIZE}
+        width={CanvasHandler.STAGE_SIZE}
+        height={CanvasHandler.STAGE_SIZE}
         ref={stageRef}
         onClick={onClickStageHandler}
         onMouseMove={onMouseMoveStageHandler}

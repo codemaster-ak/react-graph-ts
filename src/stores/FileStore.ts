@@ -1,7 +1,7 @@
 import {action, makeObservable, observable} from 'mobx';
 import axios from "axios";
 import {Urls} from "../enums";
-import {FileI} from "../interfaces";
+import {FileI, IncidenceMatrixI} from "../interfaces";
 
 class FileStore {
     @observable files = observable.array<FileI>([])
@@ -22,7 +22,7 @@ class FileStore {
     }
 
     @action
-    async save(payload: any[]): Promise<void> {
+    async save(payload: IncidenceMatrixI): Promise<void> {
         const fileName = await axios.post<FileI>(Urls.createFile, payload)
         this.files.push(fileName.data)
     }
