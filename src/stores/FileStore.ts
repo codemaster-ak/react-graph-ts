@@ -1,13 +1,14 @@
-import {action, makeObservable, observable} from 'mobx';
+import {action, IObservableArray, makeObservable, observable} from 'mobx';
 import axios from "axios";
 import {Urls} from "../enums";
 import {FileI, IncidenceMatrixI} from "../interfaces";
 
 class FileStore {
-    @observable files = observable.array<FileI>([])
+    @observable files: IObservableArray<FileI>
 
     constructor() {
         makeObservable(this)
+        this.files = observable.array<FileI>([])
     }
 
     @action
@@ -16,8 +17,8 @@ class FileStore {
         this.files = observable.array(files.data)
     }
 
-    async getFileByName(name: string): Promise<any[]> {
-        const fileContent = await axios.get<any[]>(Urls.getFileByName + name)
+    async getFileByName(name: string): Promise<IncidenceMatrixI> {
+        const fileContent = await axios.get<IncidenceMatrixI>(Urls.getFileByName + name)
         return fileContent.data
     }
 
@@ -27,7 +28,7 @@ class FileStore {
         this.files.push(fileName.data)
     }
 
-    async update(payload: any[], name: string): Promise<void> {
+    async update(payload: IncidenceMatrixI, name: string): Promise<void> {
         await axios.put(Urls.updateFile + name, payload)
     }
 
