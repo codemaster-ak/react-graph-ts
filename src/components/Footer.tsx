@@ -101,6 +101,7 @@ const Footer: FC<FooterProps> = observer(({
     }
 
     const updateFile = () => {
+        graphStore.removeConnectionsFromPoints()
         fileStore.update(graphStore.incidenceMatrix, selectedFile).then()
     }
 
