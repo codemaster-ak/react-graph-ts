@@ -11,9 +11,6 @@ interface ConnectionWeightProps {
     connection: Connection
     hovered: boolean
     hoveredConnection: Connection | null
-    // onMouseEnter: (connection: Connection) => void
-    // onMouseMove: (connection: Connection) => void
-    // onMouseLeave: (e:any) => void
 }
 
 const ConnectionWeight: FC<ConnectionWeightProps> = ({
@@ -22,9 +19,6 @@ const ConnectionWeight: FC<ConnectionWeightProps> = ({
                                                          connection,
                                                          hovered,
                                                          hoveredConnection,
-                                                         // onMouseEnter,
-                                                         // onMouseMove,
-                                                         // onMouseLeave
                                                      }) => {
 
     const {key, weight} = connection
@@ -39,19 +33,6 @@ const ConnectionWeight: FC<ConnectionWeightProps> = ({
 
     return <Fragment>
         <Circle
-            // onMouseEnter={() => onMouseEnter(connection)}
-            // onMouseMove={(e) => {
-
-            // console.log(CanvasHandler.getMousePos(e))
-
-            // onMouseMove(connection)
-            /*}}*/
-            // onMouseLeave={(e) => {
-            // console.log(e)
-            // console.log(CanvasHandler.getMousePos(e))
-            // onMouseLeave(e)
-            /*}}*/
-            // ref={ref}
             x={x}
             y={y}
             radius={20}

@@ -1,12 +1,14 @@
 import React, {Dispatch, FC, SetStateAction, useEffect, useState} from 'react';
 import {Button, Radio, Select} from "antd";
 import graphStore from "../stores/GraphStore";
-import Graph from "../classes/Graph";
+import BasePathfinder from "../classes/BasePathfinder";
 import {ComputeMethods} from "../enums";
 import ResultTableModal from "./ResultTableModal";
 import fileStore from "../stores/FileStore";
 import {observer} from "mobx-react-lite";
 import CanvasHandler from "../classes/CanvasHandler";
+import PointSelect from "./PointSelect";
+import stackStore from "../stores/StackStore";
 
 const {Option} = Select
 
@@ -45,25 +47,25 @@ const Footer: FC<FooterProps> = observer(({
     const addPoint = () => {
         const x = Math.round(Math.random() * CanvasHandler.STAGE_SIZE)
         const y = Math.round(Math.random() * CanvasHandler.STAGE_SIZE)
-        graphStore.addPoint(x, y)
+        stackStore.addPoint(x, y)
     }
 
     const addConnection = () => {
         if (fromPointKey && toPointKey) {
             const from = graphStore.findPointByKey(fromPointKey)
             const to = graphStore.findPointByKey(toPointKey)
-            if (from && to) graphStore.addConnection(from, to)
+            if (from && to) stackStore.addConnection(from, to)
         }
     }
 
     const showResult = () => {
         setResultModalVisible(true)
-        const matrix = Graph.adjacencyMatrixValues()
+        const matrix = BasePathfinder.adjacencyMatrixValues()
 
-        const distances = Graph.dijkstra(matrix)
-        const paths = Graph.pathsFromMatrix(matrix)
+        const distances = BasePathfinder.dijkstra(matrix)
+        const paths = BasePathfinder.pathsFromMatrix(matrix)
 
-        const fullPaths = Graph.computeFullPaths(paths)
+        const fullPaths = BasePathfinder.computeFullPaths(paths)
 
         const tablePaths = []
         for (let i = 0; i < fullPaths.length; i++) {
@@ -88,20 +90,18 @@ const Footer: FC<FooterProps> = observer(({
     }
 
     const download = () => {
-        fileStore.getFileByName(selectedFile).then(data => {
-            if (Array.isArray(data)) {
-                graphStore.parseFromIncidenceMatrix(data)
-            }
+        fileStore.getFileByName(selectedFile).then(() => {
+            graphStore.parseFromStack(stackStore.stack)
         })
     }
 
     const createFile = () => {
-        graphStore.removeConnectionsFromPoints()
-        fileStore.save(graphStore.incidenceMatrix).then()
+        // graphStore.removeConnectionsFromPoints()
+        fileStore.save().then()
     }
 
     const updateFile = () => {
-        graphStore.removeConnectionsFromPoints()
+        // graphStore.removeConnectionsFromPoints()
         fileStore.update(graphStore.incidenceMatrix, selectedFile).then()
     }
 
@@ -112,8 +112,8 @@ const Footer: FC<FooterProps> = observer(({
     }
 
     const compareMethods = () => {
-        const matrix = Graph.adjacencyMatrixValues()
-        const comparedTime = Graph.compareMethods(matrix)
+        const matrix = BasePathfinder.adjacencyMatrixValues()
+        const comparedTime = BasePathfinder.compareMethods(matrix)
         setCompareResult(`${ComputeMethods.Dijkstra}: ${comparedTime.dijkstra}; ${ComputeMethods.Floyd}: ${comparedTime.floyd}`)
     }
 
@@ -124,28 +124,8 @@ const Footer: FC<FooterProps> = observer(({
     return <div className='flex-center padding-md'>
         <div className="flex-column">
             <div>
-                <Select
-                    value={fromPointKey}
-                    onChange={value => setFromPointKey(value)}
-                    style={{width: 100}}
-                >
-                    {graphStore.points.map(point => {
-                        return <Option value={point.key} key={point.key}>
-                            {point.getName()}
-                        </Option>
-                    })}
-                </Select>
-                <Select
-                    value={toPointKey}
-                    onChange={value => setToPointKey(value)}
-                    style={{width: 100}}
-                >
-                    {graphStore.points.map(point => {
-                        return <Option value={point.key} key={point.key}>
-                            {point.getName()}
-                        </Option>
-                    })}
-                </Select>
+                <PointSelect value={fromPointKey} onChange={setFromPointKey}/>
+                <PointSelect value={toPointKey} onChange={setToPointKey}/>
             </div>
             <Button
                 type="primary"

@@ -1,12 +1,13 @@
 import React, {FC, useState} from 'react';
 import {Button, message, Select} from "antd";
-import Graph from "../classes/Graph";
+import BasePathfinder from "../classes/BasePathfinder";
 import {ComputeMethods, ConnectionColours, PointColours} from "../enums";
 import Painter from "../classes/Painter";
 import graphStore from "../stores/GraphStore";
-import Pathfinder from "../classes/Pathfinder";
+import RecursivePathfinder from "../classes/RecursivePathfinder";
 import {observer} from "mobx-react-lite";
 import Point from "../classes/Point";
+import {PathI} from "../interfaces";
 
 const {Option} = Select
 
@@ -27,7 +28,7 @@ const Header: FC<HeaderProps> = observer(({
                                           }) => {
 
     const [highlighting, setHighlighting] = useState<boolean>(false)
-    const [path, setPath] = useState<number[]>([])
+    const [path, setPath] = useState<PathI>([])
     const [distance, setDistance] = useState<number | undefined>(undefined)
     const [pathsThroughPoints, setPathsThroughPoints] = useState<{ path: string[], id: string }[]>([])
     const [selectedPathId, setSelectedPathId] = useState<string>('')
@@ -37,8 +38,7 @@ const Header: FC<HeaderProps> = observer(({
         const pathThroughPoints = pathsThroughPoints.find(path => path.id === pathId)
         if (pathThroughPoints) {
             const points = pathThroughPoints.path.map(key => graphStore.findPointByKey(key) as Point)
-            const pointsNumbers = points.map(point => graphStore.findIndexByPoint(point) as number)
-            setPath(pointsNumbers)
+            setPath(points)
         }
     }
 
@@ -48,9 +48,10 @@ const Header: FC<HeaderProps> = observer(({
             graphStore.changeConnectionsColour(Painter.getConnectionsToStopHighlight(), ConnectionColours.BASE)
         } else {
             if (path.length > 0) {
-                graphStore.changePointsColour(Painter.getPointsToHighlight(path), PointColours.HIGHLIGHTED)
+                const pathNumbers = path.map(point => graphStore.findIndexByPoint(point) as number)
+                graphStore.changePointsColour(Painter.getPointsToHighlight(pathNumbers), PointColours.HIGHLIGHTED)
                 graphStore.changeConnectionsColour(
-                    Painter.getConnectionsToHighlight(path), ConnectionColours.HIGHLIGHTED
+                    Painter.getConnectionsToHighlight(pathNumbers), ConnectionColours.HIGHLIGHTED
                 )
             }
         }
@@ -58,7 +59,7 @@ const Header: FC<HeaderProps> = observer(({
     }
 
     const computePath = () => {
-        const matrix = Graph.adjacencyMatrixValues()
+        const matrix = BasePathfinder.adjacencyMatrixValues()
         try {
             let startIndex = 0, finishIndex = 0
             const pointFrom = graphStore.findPointByKey(fromPointKey)//todo упростить
@@ -67,9 +68,10 @@ const Header: FC<HeaderProps> = observer(({
                 startIndex = graphStore.findIndexByPoint(pointFrom) as number
                 finishIndex = graphStore.findIndexByPoint(pointTo) as number
             }
-            const [distance, path] = Graph.computePath(matrix, startIndex, finishIndex, selectedMethod)
+            const [distance, path] = BasePathfinder.computePath(matrix, startIndex, finishIndex, selectedMethod)
             setDistance(distance)
-            setPath(path)
+            const points = Painter.getPointsToHighlightFromPath(path)
+            setPath(points)
         } catch (error: any) {
             message.error(error).then()
         }
@@ -77,7 +79,7 @@ const Header: FC<HeaderProps> = observer(({
 
     const computePathThroughPoints = () => {
         const fromToPathKeys: string[][] = []
-        const pathfinder = new Pathfinder()
+        const pathfinder = new RecursivePathfinder()
         const allPaths = pathfinder.allPaths(graphStore.points)
         for (let i = 0; i < allPaths.length; i++) {
             for (let j = 0; j < allPaths[i].length; j++) {
@@ -94,22 +96,13 @@ const Header: FC<HeaderProps> = observer(({
             }
             if (includes) pathsThroughPointKeys.push({path: fromToPathKeys[i], id: String(Math.random())})
         }
-        // const paths: Point[][] = []
-        // for (let i = 0; i < pathsThroughPointKeys.length; i++) {
-        //     const path: Point[] = []
-        //     for (let j = 0; j < pathsThroughPointKeys[i].length; j++) {
-        //         path.push(graphStore.findPointByKey(pathsThroughPointKeys[i][j]) as Point)
-        //     }
-        //     paths.push(path)
-        // }
         setPathsThroughPoints(pathsThroughPointKeys)
     }
 
-    const getPathValue = (path: number[]) => {
+    const getPathValue = (path: Point[]) => {
         let value = ''
         for (let i = 0; i < path.length; i++) {
-            const point = graphStore.points[path[i]]
-            if (point) value += point.getName() + ' -> '
+          value += path[i].getName() + ' -> '
         }
         return value.substring(0, value.length - 4)
     }
@@ -160,7 +153,8 @@ const Header: FC<HeaderProps> = observer(({
                         {pathValue}
                     </Option>
                 })}
-            </Select></div>
+            </Select>
+        </div>
         {path.length > 0 && graphStore.points.length > 0 && <p>Путь - {getPathValue(path)}</p>}
         <p>{compareResult}</p>
         {distance && <p>Расстояние - {distance}</p>}

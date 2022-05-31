@@ -1,8 +1,10 @@
 import {ComputeMethods} from '../enums';
 import graphStore from "../stores/GraphStore";
 import {AdjacencyMatrixI} from "../interfaces";
+import Point from "./Point";
+import Connection from "./Connection";
 
-export default class Graph {
+export default class BasePathfinder {
     static computePath(
         matrix: number[][],
         startPointIndex: number,
@@ -99,7 +101,24 @@ export default class Graph {
         return matrixValues
     }
 
-    private static cloneMatrix(matrix: AdjacencyMatrixI): number[][] {
+    private static cloneMatrix(matrix: any[][]): number[][] {
+        const matrix_=[]
+        for (let i = 0; i < matrix.length; i++) {
+            for (let j = 0; j < matrix[i].length; j++) {
+                if (matrix[i][j] instanceof Point){
+
+                }
+                if (matrix[i][j] instanceof Connection){
+                    // matrix_[i][j ]=  new Connection(
+                    //     new Point(from.x, from.y, from.colour, [], from.key),
+                    //     new Point(to.x, to.y, to.colour, [], to.key),
+                    //     weight,
+                    //     colour,
+                    //     key
+                    // )
+                }
+            }
+        }
         graphStore.removeConnectionsFromPoints() // todo refactor
         const _matrix: number[][] = JSON.parse(JSON.stringify(matrix))
         for (let i = 0; i < _matrix.length; i++) {

@@ -20,7 +20,7 @@ const MatrixCell: FC<MatrixCellProps> = observer(({
 
     const getCellText = (cell: IncidenceMatrixCell): string => {
         if (cell instanceof Connection || cell instanceof Point) return cell.getName()
-        else return ''
+        return ''
     }
 
     const getWeight = (cell: IncidenceMatrixCell): number | undefined => {
@@ -28,10 +28,8 @@ const MatrixCell: FC<MatrixCellProps> = observer(({
     }
 
     const changeWeight = (value: number): void => {
-        if (value > 0 && value < 100) {
-            for (let i = 0; i < graphStore.connections.length; i++) {
-                if (i + 1 === col) graphStore.changeConnectionWeight(graphStore.connections[i].key, value)
-            }
+        for (let i = 0; i < graphStore.connections.length; i++) {
+            if (i + 1 === col) graphStore.changeConnectionWeight(graphStore.connections[i].key, value)
         }
     }
 

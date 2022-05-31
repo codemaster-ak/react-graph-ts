@@ -9,7 +9,6 @@ import graphStore from '../stores/GraphStore';
 import Connections from './canvas-components/Connections';
 import ConnectionWeights from './canvas-components/ConnectionWeights';
 import ConnectionPreview from './canvas-components/ConnectionPreview';
-import PointTitles from './canvas-components/PointTitles';
 import CanvasHandler from '../classes/CanvasHandler';
 import {runInAction} from 'mobx';
 import {ConnectionColours} from "../enums";
@@ -17,6 +16,7 @@ import Connection from "../classes/Connection";
 import Package from "./canvas-components/Package";
 import canvasStore from "../stores/CanvasStore";
 import KonvaEventObject = Konva.KonvaEventObject;
+import stackStore from "../stores/StackStore";
 
 const Canvas: FC = observer(() => {
 
@@ -47,13 +47,13 @@ const Canvas: FC = observer(() => {
         if (event.target === stage) {
             event.evt.preventDefault()
             const mousePos = CanvasHandler.getMousePos(event)
-            graphStore.addPoint(mousePos.x, mousePos.y)
+            stackStore.addPoint(mousePos.x, mousePos.y)
         }
     }
 
     const addConnection = (mousePos: Konva.Vector2d, from: Point): void => {
         const target = CanvasHandler.detectConnection(mousePos, from)
-        if (target) graphStore.addConnection(from, target)
+        if (target) stackStore.addConnection(from, target)
     }
 
     const anchorDragStartHandler = (event: KonvaEventObject<DragEvent>) => {
@@ -110,7 +110,6 @@ const Canvas: FC = observer(() => {
                 onAnchorDragEnd={anchorDragEndHandler}
             />
             <Points/>
-            <PointTitles/>
             <Package/>
         </Layer>
     </Stage>

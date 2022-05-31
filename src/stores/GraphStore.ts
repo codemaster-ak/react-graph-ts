@@ -2,8 +2,9 @@ import {action, computed, IObservableArray, makeObservable, observable} from 'mo
 import Point from '../classes/Point';
 import Connection from '../classes/Connection';
 import {ConnectionColours, PointColours} from "../enums";
-import {AdjacencyMatrixI, IncidenceMatrixI} from "../interfaces";
+import {AdjacencyMatrixI, IncidenceMatrixI, ShapeI} from "../interfaces";
 import canvasStore from "./CanvasStore";
+import stackStore from "./StackStore";
 
 class GraphStore {
     @observable points: IObservableArray<Point>
@@ -51,20 +52,34 @@ class GraphStore {
     }
 
     @action
-    addPoint(x: number, y: number): void {
+    addPoint(x: number, y: number, colour?: PointColours, connections?: Connection[], key?: string): number | undefined {
         if (this.points.length < 10) {
-            const newPoint = new Point(x, y)
-            this.points.push(newPoint)
+            const newPoint = new Point(x, y, colour, connections, key)
+            return this.points.push(newPoint)
         }
     }
 
     @action
-    addConnection(from: Point, to: Point): void {
+    addConnection(from: Point, to: Point, weight?: number, colour?: ConnectionColours, key?: string): number | undefined {
         if (!this.checkConnectionExist(from, to)) {
-            const newConnection = new Connection(from, to)
+            const newConnection = new Connection(from, to, weight, colour, key)
             from.connections.push(newConnection)
             to.connections.push(newConnection)
-            this.connections.push(newConnection)
+            return this.connections.push(newConnection)
+        }
+    }
+
+    @action
+    parseFromStack(stack: ShapeI[]): void {
+        for (let i = 0; i < stack.length; i++) {
+            if (stack[i] instanceof Point) {
+                const {x, y, colour, key} = <Point>stack[i]
+                this.addPoint(x, y, colour, [], key)
+            }
+            if (stack[i] instanceof Connection) {
+                const {from, to, weight, colour, key} = <Connection>stack[i]
+                this.addConnection(from, to, weight, colour, key)
+            }
         }
     }
 
@@ -77,7 +92,6 @@ class GraphStore {
             from.connections.push(this.connections[i])
             to.connections.push(this.connections[i])
         }
-        // console.log(this.points)
     }
 
     @action
@@ -148,6 +162,7 @@ class GraphStore {
     @action
     deletePoint(point: Point): void {
         this.points.remove(point)
+        stackStore.removeFromStack(point)
         const connections = this.findConnectionsByPointKey(point.key)
         connections.forEach(connection => this.deleteConnection(connection))
         if (canvasStore.selectedPoint?.key === point.key) canvasStore.selectedPoint = null
@@ -156,6 +171,7 @@ class GraphStore {
     @action
     deleteConnection(connection: Connection): void {
         this.connections.remove(connection)
+        stackStore.removeFromStack(connection)
     }
 
     @action
@@ -226,6 +242,10 @@ class GraphStore {
 
     findPointByKey(key: string): Point | undefined {
         return this.points.find(point => point.key === key)
+    }
+
+    findConnectionByKey(key: string): Connection | undefined {
+        return this.connections.find(connection => connection.key === key)
     }
 
     findConnectionsByPointKey(key: string): Connection[] {

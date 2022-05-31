@@ -27,9 +27,4 @@ export default class Connection implements ShapeI {
         const {from, to} = this
         return from.key.substring(from.key.length - 2) + '-' + to.key.substring(to.key.length - 2)
     }
-
-    getPointsCoords(): number[] {//todo??
-        const {from, to} = this
-        return [from.x, from.y, to.x, to.y]
-    }
 }

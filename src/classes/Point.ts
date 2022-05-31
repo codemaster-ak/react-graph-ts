@@ -28,7 +28,8 @@ export default class Point implements ShapeI {
         return this.key.substring(this.key.length - 2)
     }
 
-    removeConnections() {
+    removeConnections(): Point {
         this.connections = []
+        return this
     }
 }

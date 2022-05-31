@@ -55,14 +55,8 @@ const ConnectionWeights: FC<ConnectionWeightsProps> = observer(({
                     connection={connection}
                     hovered={hovered}
                     hoveredConnection={hoveredConnection}
-                    // onMouseEnter={onMouseEnter}
-                    // onMouseMove={onMouseMove}
-                    // onMouseLeave={onMouseLeave}
                 />
                 <Text
-                    // onMouseEnter={() => onMouseEnter(connection)}
-                    // onMouseMove={() => onMouseMove(connection)}
-                    // onMouseLeave={(e) => onMouseLeave(e)}
                     text={String(weight)}
                     fontSize={16}
                     x={weight < 10 ? x - 4 : x - 9}
