@@ -71,16 +71,20 @@ class GraphStore {
 
     @action
     parseFromStack(stack: ShapeI[]): void {
+        this.clearAll()
         for (let i = 0; i < stack.length; i++) {
-            if (stack[i] instanceof Point) {
+            const point = Point.parsePoint(stack[i])
+            if (point) {
                 const {x, y, colour, key} = <Point>stack[i]
                 this.addPoint(x, y, colour, [], key)
             }
-            if (stack[i] instanceof Connection) {
+            const connection = Connection.parseConnection(stack[i])
+            if (connection) {
                 const {from, to, weight, colour, key} = <Connection>stack[i]
                 this.addConnection(from, to, weight, colour, key)
             }
         }
+        console.log(this.points,this.connections)
     }
 
     @action
@@ -124,13 +128,13 @@ class GraphStore {
         for (let i = 0; i < this.connections.length; i++) {
             if (this.connections[i].from.key === point.key) {
                 const {from, to, colour, key, weight} = this.connections[i]
-                let newConnection = new Connection(from, to, weight, colour, key)
+                const newConnection = new Connection(from, to, weight, colour, key)
                 newConnection.from = point
                 this.connections[i] = newConnection
             }
             if (this.connections[i].to.key === point.key) {
                 const {from, to, colour, key, weight} = this.connections[i]
-                let newConnection = new Connection(from, to, weight, colour, key)
+                const newConnection = new Connection(from, to, weight, colour, key)
                 newConnection.to = point
                 this.connections[i] = newConnection
             }
@@ -185,6 +189,7 @@ class GraphStore {
     clearAll(): void {
         graphStore.points.clear()
         graphStore.connections.clear()
+        canvasStore.selectedPoint = null
     }
 
     /** Матрица инцидентности */

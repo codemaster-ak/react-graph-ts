@@ -27,4 +27,16 @@ export default class Connection implements ShapeI {
         const {from, to} = this
         return from.key.substring(from.key.length - 2) + '-' + to.key.substring(to.key.length - 2)
     }
+
+    static parseConnection(shape: object): Connection | undefined {
+        if (shape.hasOwnProperty('from') &&
+            shape.hasOwnProperty('to') &&
+            shape.hasOwnProperty('weight')) {
+            const connection = <Connection>shape
+            const {from, to, weight, colour, key} = connection
+            from.connections = []
+            to.connections = []
+            return new Connection(from, to, weight, colour, key)
+        }
+    }
 }

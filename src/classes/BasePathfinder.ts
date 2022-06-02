@@ -1,11 +1,17 @@
 import {ComputeMethods} from '../enums';
 import graphStore from "../stores/GraphStore";
-import {AdjacencyMatrixI} from "../interfaces";
 import Point from "./Point";
 import Connection from "./Connection";
+import {PathI} from "../interfaces";
 
 export default class BasePathfinder {
-    static computePath(
+    paths: PathI[]
+
+    constructor() {
+        this.paths = []
+    }
+
+    computePath(
         matrix: number[][],
         startPointIndex: number,
         finishPointIndex: number,
@@ -27,16 +33,17 @@ export default class BasePathfinder {
 
         if (fullPaths[finishPointIndex][0] !== undefined) {
             const path = fullPaths[finishPointIndex]
+            this.paths = [path]
             return [distance, path]
         } else {
             return [Infinity, []]
         }
     }
 
-    static dijkstra(matrix: number[][], startPointIndex?: number) {
+    dijkstra(matrix: number[][], startPointIndex?: number) {
         if (startPointIndex !== undefined) return this.dijkstraPoint(matrix, startPointIndex)
         else {
-            let distances = []
+            const distances = []
             for (let i = 0; i < matrix.length; i++) {
                 const result = this.dijkstraPoint(matrix, i)
                 distances.push(result)
@@ -45,8 +52,8 @@ export default class BasePathfinder {
         }
     }
 
-    static floyd(matrix: number[][]) {
-        let matrixCopy = this.cloneMatrix(matrix)
+    floyd(matrix: number[][]) {
+        const matrixCopy = BasePathfinder.cloneMatrix(matrix)
         for (let k = 0; k < matrixCopy.length; k++) {
             for (let i = 0; i < matrixCopy.length; i++) {
                 for (let j = 0; j < matrixCopy.length; j++) {
@@ -62,7 +69,7 @@ export default class BasePathfinder {
         return matrixCopy
     }
 
-    static dijkstraPoint(matrix: number[][], startPointIndex: number) {
+    dijkstraPoint(matrix: number[][], startPointIndex: number) {
         let i: number | undefined = startPointIndex
         let viewed: number[] = [startPointIndex]
         let result = new Array(matrix.length).fill(Infinity)
@@ -74,7 +81,7 @@ export default class BasePathfinder {
                     result[j] = result[i] + matrix[i][j]
                 }
             }
-            i = this.minDistance(result, viewed)
+            i = BasePathfinder.minDistance(result, viewed)
             if (i !== undefined) viewed.push(i)
         }
         return result
@@ -92,47 +99,40 @@ export default class BasePathfinder {
         return nextPoint
     }
 
-    static adjacencyMatrixValues(): number[][] {
-        const matrixValues = this.cloneMatrix(graphStore.adjacencyMatrix)
+    get adjacencyMatrixValues(): number[][] {
+        const matrixValues = BasePathfinder.cloneMatrix(graphStore.adjacencyMatrix)
         matrixValues.shift()
-        matrixValues.forEach(row => {
-            row.shift()
-        })
+        matrixValues.forEach(row => row.shift())
         return matrixValues
     }
 
     private static cloneMatrix(matrix: any[][]): number[][] {
-        const matrix_=[]
+        const matrix_ = [...new Array(matrix.length).fill(undefined)]
         for (let i = 0; i < matrix.length; i++) {
+            matrix_[i] = [...new Array(matrix.length).fill(undefined)]
             for (let j = 0; j < matrix[i].length; j++) {
-                if (matrix[i][j] instanceof Point){
-
+                if (matrix[i][j] instanceof Point) {
+                    const {x, y, colour, key} = matrix[i][j] as Point
+                    matrix_[i][j] = new Point(x, y, colour, [], key)
                 }
-                if (matrix[i][j] instanceof Connection){
-                    // matrix_[i][j ]=  new Connection(
-                    //     new Point(from.x, from.y, from.colour, [], from.key),
-                    //     new Point(to.x, to.y, to.colour, [], to.key),
-                    //     weight,
-                    //     colour,
-                    //     key
-                    // )
+                if (matrix[i][j] instanceof Connection) {
+                    const {from, to, weight, colour, key} = matrix[i][j] as Connection
+                    matrix_[i][j] = new Connection(
+                        new Point(from.x, from.y, from.colour, [], from.key),
+                        new Point(to.x, to.y, to.colour, [], to.key),
+                        weight,
+                        colour,
+                        key
+                    )
                 }
+                matrix_[i][j] = matrix[i][j]
             }
         }
-        graphStore.removeConnectionsFromPoints() // todo refactor
-        const _matrix: number[][] = JSON.parse(JSON.stringify(matrix))
-        for (let i = 0; i < _matrix.length; i++) {
-            for (let j = 0; j < _matrix.length; j++) {
-                if (_matrix[i][j] === null) {
-                    _matrix[i][j] = Infinity
-                }
-            }
-        }
-        return _matrix
+        return matrix_
     }
 
-    static pathsFromMatrix(matrix: number[][], method: ComputeMethods = ComputeMethods.Dijkstra): number[][] {
-        const paths: number[][] = this.initMatrixPaths(matrix)
+    pathsFromMatrix(matrix: number[][], method: ComputeMethods = ComputeMethods.Dijkstra): number[][] {
+        const paths: number[][] = BasePathfinder.initMatrixPaths(matrix)
         // if (method === ComputeMethods.Dijkstra) {
         for (let i = 0; i < matrix.length; i++) {
             let j: number | undefined = i
@@ -149,7 +149,7 @@ export default class BasePathfinder {
                         path[k] = j
                     }
                 }
-                j = this.minDistance(result, viewed)
+                j = BasePathfinder.minDistance(result, viewed)
                 if (j !== undefined) viewed.push(j)
             }
             paths[i] = path
@@ -183,7 +183,7 @@ export default class BasePathfinder {
         return paths
     }
 
-    static computeFullPaths(paths: any[], startPoint?: number): any[] {
+    computeFullPaths(paths: any[], startPoint?: number): any[] {
         const allFullPaths = []
 
         for (let i = 0; i < paths.length; i++) {
@@ -210,7 +210,7 @@ export default class BasePathfinder {
         return startPoint !== undefined ? allFullPaths[startPoint] : allFullPaths
     }
 
-    static compareMethods(matrix: number[][], cyclesCount = 10000): { dijkstra: number, floyd: number } {
+    compareMethods(matrix: number[][], cyclesCount = 10000): { dijkstra: number, floyd: number } {
         const dijkstraStart = new Date().getTime()
         for (let i = 0; i < cyclesCount; i++) {
             this.dijkstra(matrix)

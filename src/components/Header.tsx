@@ -38,6 +38,8 @@ const Header: FC<HeaderProps> = observer(({
         const pathThroughPoints = pathsThroughPoints.find(path => path.id === pathId)
         if (pathThroughPoints) {
             const points = pathThroughPoints.path.map(key => graphStore.findPointByKey(key) as Point)
+            graphStore.changePointsColour(Painter.getPointsToStopHighlight(), PointColours.BASE)
+            graphStore.changeConnectionsColour(Painter.getConnectionsToStopHighlight(), ConnectionColours.BASE)
             setPath(points)
         }
     }
@@ -59,7 +61,8 @@ const Header: FC<HeaderProps> = observer(({
     }
 
     const computePath = () => {
-        const matrix = BasePathfinder.adjacencyMatrixValues()
+        const ptf = new BasePathfinder()
+        const matrix = ptf.adjacencyMatrixValues
         try {
             let startIndex = 0, finishIndex = 0
             const pointFrom = graphStore.findPointByKey(fromPointKey)//todo упростить
@@ -68,14 +71,24 @@ const Header: FC<HeaderProps> = observer(({
                 startIndex = graphStore.findIndexByPoint(pointFrom) as number
                 finishIndex = graphStore.findIndexByPoint(pointTo) as number
             }
-            const [distance, path] = BasePathfinder.computePath(matrix, startIndex, finishIndex, selectedMethod)
+            const [distance, path] = ptf.computePath(matrix, startIndex, finishIndex, selectedMethod)
             setDistance(distance)
             const points = Painter.getPointsToHighlightFromPath(path)
-            setPath(points)
+            const keys: string[] = points.map(point => point.key)
+            const pathPointKeys: { path: string[], id: string }[] = [{path: keys, id: String(Math.random())}]
+            setPathsThroughPoints(pathPointKeys)
+            // setPath(points)
+
         } catch (error: any) {
             message.error(error).then()
         }
     }
+
+    // const findPointsByIndex=(pointIndexes:number[])=>{
+    //     for (let i = 0; i < pointIndexes.length; i++) {
+    //         graphStore.points[i]
+    //     }
+    // }
 
     const computePathThroughPoints = () => {
         const fromToPathKeys: string[][] = []
@@ -96,15 +109,14 @@ const Header: FC<HeaderProps> = observer(({
             }
             if (includes) pathsThroughPointKeys.push({path: fromToPathKeys[i], id: String(Math.random())})
         }
+        setPath([])
+        setSelectedPathId('')
         setPathsThroughPoints(pathsThroughPointKeys)
     }
 
-    const getPathValue = (path: Point[]) => {
-        let value = ''
-        for (let i = 0; i < path.length; i++) {
-          value += path[i].getName() + ' -> '
-        }
-        return value.substring(0, value.length - 4)
+    const animate = () => {
+        setHighlighting(true)
+        Painter.animatePath(path)
     }
 
     return <div className='flex-center-column padding-md'>
@@ -112,17 +124,10 @@ const Header: FC<HeaderProps> = observer(({
             <div className='flex-container'>
                 <Button
                     type="primary"
-                    onClick={() => Painter.animatePath(path)}
+                    onClick={animate}
                     disabled={path?.length === 0}
                 >
                     Анимировать путь
-                </Button>
-                <Button
-                    type="primary"
-                    onClick={computePath}
-                    disabled={!fromPointKey || !toPointKey}
-                >
-                    Кратчайший путь
                 </Button>
                 <Button
                     type="primary"
@@ -133,13 +138,21 @@ const Header: FC<HeaderProps> = observer(({
                 </Button>
                 <Button
                     type="primary"
+                    onClick={computePath}
+                    disabled={!fromPointKey || !toPointKey}
+                >
+                    Кратчайший путь
+                </Button>
+
+                <Button
+                    type="primary"
                     onClick={computePathThroughPoints}
                     disabled={!fromPointKey || !toPointKey}
                 >
                     Путь через точки
                 </Button>
             </div>
-            <Select value={selectedPathId} onChange={selectPath}>
+            <Select value={selectedPathId} onChange={selectPath} onClear={() => setPath([])} allowClear>
                 {pathsThroughPoints.map(path => {
                     const pathNames: (string | null)[] = path.path
                         .map(pointKey => {
@@ -155,7 +168,6 @@ const Header: FC<HeaderProps> = observer(({
                 })}
             </Select>
         </div>
-        {path.length > 0 && graphStore.points.length > 0 && <p>Путь - {getPathValue(path)}</p>}
         <p>{compareResult}</p>
         {distance && <p>Расстояние - {distance}</p>}
     </div>

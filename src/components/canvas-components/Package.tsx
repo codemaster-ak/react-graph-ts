@@ -22,7 +22,7 @@ const Package = observer(() => {
             imageRef.current.to({
                 x: transitionLine.to.x,
                 y: transitionLine.to.y,
-                duration: transitionLine.weight
+                duration: 1
             })
         }
     }

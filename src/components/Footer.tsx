@@ -59,13 +59,13 @@ const Footer: FC<FooterProps> = observer(({
     }
 
     const showResult = () => {
-        setResultModalVisible(true)
-        const matrix = BasePathfinder.adjacencyMatrixValues()
+        const ptf = new BasePathfinder()
+        const matrix = ptf.adjacencyMatrixValues
 
-        const distances = BasePathfinder.dijkstra(matrix)
-        const paths = BasePathfinder.pathsFromMatrix(matrix)
+        const distances = ptf.dijkstra(matrix)
+        const paths = ptf.pathsFromMatrix(matrix)
 
-        const fullPaths = BasePathfinder.computeFullPaths(paths)
+        const fullPaths = ptf.computeFullPaths(paths)
 
         const tablePaths = []
         for (let i = 0; i < fullPaths.length; i++) {
@@ -86,12 +86,13 @@ const Footer: FC<FooterProps> = observer(({
                 }
             }
         }
+        setResultModalVisible(true)
         setPathList(tablePaths)
     }
 
     const download = () => {
         fileStore.getFileByName(selectedFile).then(() => {
-            graphStore.parseFromStack(stackStore.stack)
+            graphStore.parseFromStack(JSON.parse(JSON.stringify(stackStore.stack)))
         })
     }
 
@@ -112,8 +113,9 @@ const Footer: FC<FooterProps> = observer(({
     }
 
     const compareMethods = () => {
-        const matrix = BasePathfinder.adjacencyMatrixValues()
-        const comparedTime = BasePathfinder.compareMethods(matrix)
+        const ptf = new BasePathfinder()
+        const matrix = ptf.adjacencyMatrixValues
+        const comparedTime = ptf.compareMethods(matrix)
         setCompareResult(`${ComputeMethods.Dijkstra}: ${comparedTime.dijkstra}; ${ComputeMethods.Floyd}: ${comparedTime.floyd}`)
     }
 

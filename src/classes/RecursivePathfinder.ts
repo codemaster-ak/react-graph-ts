@@ -3,11 +3,8 @@ import {PathI} from "../interfaces";
 import BasePathfinder from "./BasePathfinder";
 
 export default class RecursivePathfinder extends BasePathfinder {
-    paths: PathI[]
-
     constructor() {
         super()
-        this.paths = []
     }
 
     private tryAddPointToPaths(paths: PathI[], newPoint: Point): boolean {

@@ -32,4 +32,14 @@ export default class Point implements ShapeI {
         this.connections = []
         return this
     }
+
+    static parsePoint(shape: ShapeI): Point | undefined {
+        if (shape.hasOwnProperty('x') &&
+            shape.hasOwnProperty('y')) {
+            const point = <Point>shape
+            const {x, y, key, colour} = point
+            return new Point(x, y, colour, [], key)
+        }
+    }
+
 }
