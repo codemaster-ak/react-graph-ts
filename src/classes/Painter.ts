@@ -32,7 +32,7 @@ export default class Painter {
     }
 
     static getPointsToHighlightFromPath(path: number[]): Point[] {
-        return graphStore.points.filter((_, i: number) => path.includes(i))
+        return path.map(pointIndex => graphStore.points[pointIndex])
     }
 
     static animatePath(points: Point[]): void {
